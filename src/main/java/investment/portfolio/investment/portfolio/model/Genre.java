@@ -10,6 +10,6 @@ public class Genre {
     private String[] genres;
 
     @OneToMany
-    @JoinColumn
+    @JoinColumn(name = "genre_id")
     private Music music;
 }

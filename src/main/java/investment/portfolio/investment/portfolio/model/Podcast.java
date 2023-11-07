@@ -25,5 +25,4 @@ public class Podcast {
     @OneToMany
     private Author author;
 
-
 }

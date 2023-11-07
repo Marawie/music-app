@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -15,7 +17,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Music {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,12 +25,14 @@ public class Music {
     private String title;
     private String textOfMusic;
     private LocalDate musicAddedFromArtist;
-    @Enumerated(EnumType.STRING)
-    private Genre genre;
     @ManyToOne
     @JoinColumn(name = "album_id")
     private AlbumMusic albumMusic;
 
     @ManyToOne
-    @JoinColumn(name = "" )
+    @JoinColumn (name = "genre_id")
+    private Genre genre;
+
+    @ManyToMany(mappedBy = "musics")
+    private Set<Playlist> playlists = new HashSet<>();
 }

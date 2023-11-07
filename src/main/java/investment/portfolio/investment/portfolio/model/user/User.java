@@ -1,10 +1,14 @@
 package investment.portfolio.investment.portfolio.model.user;
 
+import investment.portfolio.investment.portfolio.model.Playlist;
 import investment.portfolio.investment.portfolio.model.token.Token;
 import jakarta.persistence.*;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +27,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
-    private Long Userid;
+    private Long id;
     @Column(unique = true, nullable = false)
     private String username;
     private String firstname;
@@ -39,6 +43,10 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private Set<Playlist> playlists = new HashSet<>();
 
 
 

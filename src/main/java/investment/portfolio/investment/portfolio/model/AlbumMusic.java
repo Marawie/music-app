@@ -21,4 +21,8 @@ public class AlbumMusic {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "album_id")
     private Set<Music> musicList = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Author author;
 }
