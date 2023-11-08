@@ -1,6 +1,8 @@
 package investment.portfolio.investment.portfolio.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +20,9 @@ public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nameOfArtist;
 
+    private String nameOfArtist;
+    @Size(min = 13, max = 100)
     private Integer yearOld;
     private String biography;
     @Lob

@@ -1,8 +1,10 @@
 package investment.portfolio.investment.portfolio.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 
 @Entity
+@Builder
 public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

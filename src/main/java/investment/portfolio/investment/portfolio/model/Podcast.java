@@ -1,6 +1,7 @@
 package investment.portfolio.investment.portfolio.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class Podcast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank
     @Lob
     private byte[] podcast;
     private LocalDate podcastAddedByArtist;
