@@ -29,10 +29,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(min = 3, max = 50)
-    @NotBlank
     @Column(unique = true, nullable = false)
     private String username;
     @Size(min = 3, max = 50)
@@ -41,12 +40,9 @@ public class User implements UserDetails {
     @Size(min = 3, max = 50)
 
     private String lastname;
-    @NotBlank
     @Email
     @Column(unique = true, nullable = false)
     private String email;
-    @Size(min = 8, max = 32)
-
     private String password;
     @Enumerated(EnumType.STRING)
     private Sex sex;

@@ -6,9 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -25,6 +26,6 @@ public class Podcast {
     private LocalDate podcastAddedByArtist;
 
     @OneToMany
-    private Author author;
+    private Set<Author> author = new HashSet<>();
 
 }
