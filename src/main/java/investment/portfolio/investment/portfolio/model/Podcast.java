@@ -27,5 +27,4 @@ public class Podcast {
 
     @OneToMany
     private Set<Author> author = new HashSet<>();
-
 }

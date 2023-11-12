@@ -30,5 +30,4 @@ public class Playlist {
             inverseJoinColumns = @JoinColumn(name = "music_id")
     )
     private Set<Music> musics = new HashSet<>();
-
 }

@@ -2,10 +2,10 @@ package investment.portfolio.investment.portfolio.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Data;
 
-import java.util.HashSet;
 import java.util.Set;
-
+@Data
 @Entity
 @Builder
 public class Genre {
@@ -17,5 +17,4 @@ public class Genre {
     @OneToMany
     @JoinColumn(name = "genre_id")
     private Set<Music> music;
-
 }
