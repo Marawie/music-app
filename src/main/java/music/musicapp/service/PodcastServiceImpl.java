@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PodcastServiceImpl {
+public class PodcastServiceImpl implements PodcastService {
     private final PodcastRepository podcastRepository;
-    private final PodcastService podcastService;
 }

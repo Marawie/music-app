@@ -20,11 +20,21 @@ public class Podcast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotBlank
     @Lob
     private byte[] podcast;
+
     private LocalDate podcastAddedByArtist;
 
     @OneToMany
     private Set<Author> author = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "album_podcast_id")
+    private AlbumPodcast albumPodcast;
+
+    @ManyToOne
+    @JoinColumn(name = "history_podcast")
+    private UserPodcastHistory historyOfPodcast;
 }

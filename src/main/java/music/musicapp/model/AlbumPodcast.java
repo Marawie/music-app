@@ -1,13 +1,13 @@
 package music.musicapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -18,4 +18,12 @@ public class AlbumPodcast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "album_podcast_id")
+    private Set<Podcast> podcastList = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "author_podcast_id")
+    private Author authorPodcast;
 }

@@ -19,7 +19,9 @@ public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private boolean isPrivate;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

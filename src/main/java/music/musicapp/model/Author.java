@@ -21,13 +21,20 @@ public class Author {
     private Long id;
 
     private String nameOfArtist;
+
     @Size(min = 13, max = 100)
     private Integer yearOld;
+
     private String biography;
+
     @Lob
     private byte[] image;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_id")
+    @JoinColumn(name = "author_music_id")
     private Set<AlbumMusic> albumMusic = new HashSet<>();
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "author_podcast_id")
+    private Set<AlbumPodcast>  albumPodcasts= new HashSet<>();
 }

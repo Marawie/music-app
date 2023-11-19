@@ -1,7 +1,9 @@
 package music.musicapp.config;
 
-import music.musicapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import music.musicapp.repository.UserRepository;
+import music.musicapp.service.AlbumMusicServiceImpl;
+import music.musicapp.service.interfaceService.AlbumMusicService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,5 +43,6 @@ public class ApplicationConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 }

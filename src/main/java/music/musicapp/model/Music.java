@@ -22,13 +22,18 @@ public class Music {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotBlank
     @Lob
     private byte[] audio;
+
     @Size(min = 1, max = 50)
     private String title;
+
     private String textOfMusic;
+
     private LocalDate musicAddedFromArtist;
+
     @ManyToOne
     @JoinColumn(name = "album_id")
     private AlbumMusic albumMusic;
@@ -39,4 +44,8 @@ public class Music {
 
     @ManyToMany(mappedBy = "musics")
     private Set<Playlist> playlists = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "history_music")
+    private UserMusicHistory historyOfMusic;
 }

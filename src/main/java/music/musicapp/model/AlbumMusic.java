@@ -18,6 +18,7 @@ public class AlbumMusic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long albumID;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "album_id")
     private Set<Music> musicList = new HashSet<>();

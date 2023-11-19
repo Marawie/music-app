@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class GenreServiceImpl {
+public class GenreServiceImpl implements GenreService{
     private final GenreRepository genreRepository;
-    private final GenreService genreService;
 }
