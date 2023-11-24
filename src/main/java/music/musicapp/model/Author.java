@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -22,6 +23,7 @@ public class Author {
 
     private String nameOfArtist;
 
+    private String typeOfAuthor;
     @Size(min = 13, max = 100)
     private Integer yearOld;
 
@@ -29,6 +31,10 @@ public class Author {
 
     @Lob
     private byte[] image;
+
+    @OneToMany
+    @JoinColumn(name = "author_genre")
+    private List<Genre> genres;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "author_music_id")

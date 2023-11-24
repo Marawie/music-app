@@ -23,4 +23,8 @@ public class Genre {
     @OneToMany
     @JoinColumn(name = "genre_id")
     private Set<Music> music = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "author_genre")
+    private Author author;
 }

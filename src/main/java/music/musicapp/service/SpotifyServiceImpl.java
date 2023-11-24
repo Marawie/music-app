@@ -28,11 +28,11 @@ public class SpotifyServiceImpl {
 
     private final static String URL = "https://accounts.spotify.com/";
 
-    private static String accessToken;
+    private final static String urlToEndpoints = "https://api.spotify.com/";
 
     public String getAccessToken() {
 
-        HttpRequest request = HttpRequest
+        final HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(URI.create(URL + "api/token"))
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -42,12 +42,29 @@ public class SpotifyServiceImpl {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             String[] responseOfApi = response.body().split(",");
             String access = Arrays.stream(responseOfApi).findFirst().orElseThrow(RuntimeException::new);
-            String clearToken = access.substring(16);
-            System.out.println(clearToken);
-            System.out.println(response.body());
-            return clearToken;
+            return access.substring(17, access.length() - 1);
         } catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get access token");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public HttpResponse<String> getArtist() {
+
+        final HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(urlToEndpoints + "v1/artists/0TnOYISbd1XYRBk9myaseg"))
+                .header("Authorization" , "Bearer " + getAccessToken())
+                .GET()
+                .build();
+        System.out.println(request.headers());
+        try {
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            return response;
+        } catch (IOException | InterruptedException e) {
+            log.error("Error sending http request to spotify to get artist");
             throw new RuntimeException(e);
         }
     }
