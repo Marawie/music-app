@@ -1,6 +1,8 @@
 package music.musicapp.controller;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import music.musicapp.service.GenreServiceImpl;
 import music.musicapp.service.SpotifyServiceImpl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,16 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpotifyController {
 
     private final SpotifyServiceImpl spotifyService;
+    private final GenreServiceImpl genreService;
 
     @PostMapping("token")
     public void getSpotifyAccessToken() {
-        var accessToken = spotifyService.getAccessToken();
+        spotifyService.getAccessToken();
     }
 
     @GetMapping("get/artist")
-    public void getArtist(){
-        var artist = spotifyService.getArtist();
-        System.out.println(artist);
+    public void getArtist() {
+        spotifyService.getArtist();
     }
-
 }
