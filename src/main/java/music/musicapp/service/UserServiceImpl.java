@@ -3,34 +3,53 @@ package music.musicapp.service;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
+import music.musicapp.model.user.Friendship;
 import music.musicapp.model.user.User;
-import music.musicapp.repository.UserRepository;
+import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final GenreRepository genreRepository;
+    private final MusicRepository musicRepository;
+    private final PodcastRepository podcastRepository;
+    private final AuthorRepository authorRepository;
 
     @Override
-    public Optional<User> globalSearch(String username, String music) {
-      final List<User> userList = userRepository.findAll();
-return null;
-//TODO: think about how i should do it
+    public List<Object> globalSearch(String query) {
+        final List<Object> results = new ArrayList<>();
+
+        results.addAll(genreRepository.findByNameContaining(query));
+        results.addAll(musicRepository.findByTitleContaining(query));
+        results.addAll(podcastRepository.findByNameContaining(query));
+        results.addAll(authorRepository.findByNameContaining(query));
+
+        return results;
     }
 
-    public User addUserToFriends(String username) {
-        final List<User> userList = userRepository.findAll();
-        final User userFind = userList.stream()
-                .filter(user -> user.getUsername().matches(username))
-                .findFirst()
+    @Override
+    public User addUserToFriends(String username, Long currentUserId) {
+        final User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-        return userRepository.save(userFind);
+
+        final User friend = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        Friendship friendship = new Friendship();
+        friendship.setUser(currentUser);
+        friendship.setFriend(friend);
+
+        currentUser.getFriendships().add(friendship);
+
+        userRepository.save(currentUser);
+        return currentUser;
     }
 }
 

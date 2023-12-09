@@ -21,7 +21,7 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nameOfArtist;
+    private String name;
 
     private String typeOfAuthor;
     @Size(min = 13, max = 100)
