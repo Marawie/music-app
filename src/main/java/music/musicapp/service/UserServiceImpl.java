@@ -8,6 +8,7 @@ import music.musicapp.model.user.User;
 import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,14 +39,14 @@ public class UserServiceImpl implements UserService {
     public User addUserToFriends(String username, Long currentUserId) {
         final User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
+        System.out.println(currentUser);
         final User friend = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
+        System.out.println(friend);
         Friendship friendship = new Friendship();
         friendship.setUser(currentUser);
         friendship.setFriend(friend);
-
+        System.out.println(friendship);
         currentUser.getFriendships().add(friendship);
 
         userRepository.save(currentUser);
