@@ -1,8 +1,13 @@
 package music.musicapp.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import music.musicapp.dto.spotify.GenresResponse;
+import music.musicapp.exception.ExceptionEnum;
+import music.musicapp.exception.RestException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -11,6 +16,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +34,14 @@ public class SpotifyServiceImpl {
 
     private final static String URL = "https://accounts.spotify.com/";
 
+    private final static String urlToEndpoints = "https://api.spotify.com/";
+
     private static String accessToken;
 
-    public String getAccessToken() {
+    @Scheduled(fixedDelay = 60, timeUnit = TimeUnit.MINUTES)
+    public void getAccessToken() {
 
-        HttpRequest request = HttpRequest
+        final HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(URI.create(URL + "api/token"))
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -41,14 +50,47 @@ public class SpotifyServiceImpl {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             String[] responseOfApi = response.body().split(",");
-            String access = Arrays.stream(responseOfApi).findFirst().orElseThrow(RuntimeException::new);
-            String clearToken = access.substring(16);
-            System.out.println(clearToken);
-            System.out.println(response.body());
-            return clearToken;
+            String access = Arrays.stream(responseOfApi).findFirst().orElseThrow(() -> new RestException(ExceptionEnum.SPOTIFY_AUTHORIZATION_EXCEPTION));
+            accessToken = access.substring(17, access.length() - 1);
         } catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get access token");
             throw new RuntimeException(e);
         }
     }
+
+    public HttpResponse<String> getArtist() {
+
+        final HttpRequest request = buildGetHttpRequest(URI.create(urlToEndpoints + "v1/artists/0TnOYISbd1XYRBk9myaseg"));
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            return response;
+        } catch (IOException | InterruptedException e) {
+            log.error("Error sending http request to spotify to get artist");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public GenresResponse getGenres() {
+        try {
+            final HttpRequest request = buildGetHttpRequest(URI.create(urlToEndpoints + "v1/recommendations/available-genre-seeds"));
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            var responseBody = response.body();
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(responseBody, GenresResponse.class);
+        } catch (IOException | InterruptedException e) {
+            log.error("Error sending http request to spotify to get genres");
+            throw new RuntimeException(e);
+        }
+    }
+
+    private HttpRequest buildGetHttpRequest(URI uri) {
+        return HttpRequest.newBuilder()
+                .uri(uri)
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+    }
 }
+
