@@ -1,14 +1,17 @@
 package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
+import music.musicapp.dto.FriendshipDto;
+import music.musicapp.dto.UserDto;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
+import music.musicapp.mapper.FriendshipMapper;
+import music.musicapp.mapper.UserMapper;
 import music.musicapp.model.user.Friendship;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,21 +39,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUserToFriends(String username, Long currentUserId) {
+    public UserDto addUserToFriends(String username, Long currentUserId) {
         final User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-        System.out.println(currentUser);
-        final User friend = userRepository.findByUsername(username)
+
+         final User friend = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-        System.out.println(friend);
-        Friendship friendship = new Friendship();
-        friendship.setUser(currentUser);
-        friendship.setFriend(friend);
-        System.out.println(friendship);
+        FriendshipDto friendshipDto = new FriendshipDto();
+        friendshipDto.setUser(UserMapper.INSTANCE.userToUserDTO(currentUser));
+        friendshipDto.setFriend(UserMapper.INSTANCE.userToUserDTO(friend));
+        Friendship friendship = FriendshipMapper.INSTANCE.friendshipDTOToFriendship(friendshipDto);
         currentUser.getFriendships().add(friendship);
 
         userRepository.save(currentUser);
-        return currentUser;
+        return UserMapper.INSTANCE.userToUserDTO(currentUser);
     }
 }
 
