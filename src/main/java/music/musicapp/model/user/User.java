@@ -59,9 +59,9 @@ public class User implements UserDetails {
     @JoinColumn(name = "user_podcast_history")
     private UserPodcastHistory historyOfPodcasts;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "friend_id")
     private Set<Friendship> friendships = new HashSet<>();
-
 
     @Override
     public String toString() {

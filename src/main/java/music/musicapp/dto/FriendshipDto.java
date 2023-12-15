@@ -10,5 +10,4 @@ import lombok.*;
 public class FriendshipDto {
     private UserDto user;
     private UserDto friend;
-
 }

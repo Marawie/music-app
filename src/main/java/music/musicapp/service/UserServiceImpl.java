@@ -5,12 +5,11 @@ import music.musicapp.dto.FriendshipDto;
 import music.musicapp.dto.UserDto;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
-import music.musicapp.mapper.FriendshipMapper;
-import music.musicapp.mapper.UserMapper;
 import music.musicapp.model.user.Friendship;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final PodcastRepository podcastRepository;
     private final AuthorRepository authorRepository;
 
+
     @Override
     public List<Object> globalSearch(String query) {
         final List<Object> results = new ArrayList<>();
@@ -40,19 +40,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUserToFriends(String username, Long currentUserId) {
+        ModelMapper modelMapper = new ModelMapper();
         final User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-         final User friend = userRepository.findByUsername(username)
+        System.out.println(currentUser);
+        final User friend = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        System.out.println(friend);
         FriendshipDto friendshipDto = new FriendshipDto();
-        friendshipDto.setUser(UserMapper.INSTANCE.userToUserDTO(currentUser));
-        friendshipDto.setFriend(UserMapper.INSTANCE.userToUserDTO(friend));
-        Friendship friendship = FriendshipMapper.INSTANCE.friendshipDTOToFriendship(friendshipDto);
-        currentUser.getFriendships().add(friendship);
+        friendshipDto.setUser(modelMapper.map(currentUser, UserDto.class));
+        friendshipDto.setFriend(modelMapper.map(friend, UserDto.class));
 
-        userRepository.save(currentUser);
-        return UserMapper.INSTANCE.userToUserDTO(currentUser);
+        System.out.println(friendshipDto);
+        Friendship friendship = modelMapper.map(friendshipDto, Friendship.class);
+        System.out.println(friendship);
+        currentUser.getFriendships().add(friendship);
+        System.out.println(currentUser);
+        //  userRepository.saveUserFriendship(friendship);
+        return modelMapper.map(currentUser, UserDto.class);
     }
 }
 
