@@ -43,7 +43,11 @@ public enum Role {
                     Permission.USER_READ,
                     Permission.USER_DELETE,
                     Permission.USER_UPDATE,
-                    Permission.USER_CREATE
+                    Permission.USER_CREATE,
+                    Permission.USER_PREMIUM_READ,
+                    Permission.USER_PREMIUM_CREATE,
+                    Permission.USER_PREMIUM_DELETE,
+                    Permission.USER_PREMIUM_UPDATE
             )
     ),
     USER_PREMIUM(Set.of(

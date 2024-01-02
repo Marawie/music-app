@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendshipDto {
-    private UserDto user;
-    private UserDto friend;
+    private String username;
+    private String friendName;
+    private String state;
 }

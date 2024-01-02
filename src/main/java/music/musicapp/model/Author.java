@@ -2,10 +2,7 @@ package music.musicapp.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +10,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@Table(name = "author", schema = "music")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,15 +29,18 @@ public class Author {
 
     @Lob
     private byte[] image;
-
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany
     @JoinColumn(name = "author_genre")
     private List<Genre> genres;
-
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "author_music_id")
     private Set<AlbumMusic> albumMusic = new HashSet<>();
-
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "author_podcast_id")
     private Set<AlbumPodcast>  albumPodcasts= new HashSet<>();
