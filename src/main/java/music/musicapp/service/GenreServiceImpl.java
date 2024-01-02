@@ -5,6 +5,7 @@ import music.musicapp.dto.spotify.GenresResponse;
 import music.musicapp.model.Genre;
 import music.musicapp.repository.GenreRepository;
 import music.musicapp.service.interfaceService.GenreService;
+import org.modelmapper.ModelMapper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

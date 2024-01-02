@@ -1,27 +1,38 @@
 package music.musicapp.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@Entity
+@Table(name = "friendship", schema = "music")
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Builder
 public class Friendship {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "friend_id")
     private User friend;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    private FriendshipRequestState friendshipRequestState;
+
+    public Friendship(User friend, User user, FriendshipRequestState friendshipRequestState) {
+        this.friend = friend;
+        this.user = user;
+        this.friendshipRequestState = friendshipRequestState;
+    }
 }

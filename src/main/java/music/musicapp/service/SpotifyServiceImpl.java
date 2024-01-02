@@ -62,9 +62,8 @@ public class SpotifyServiceImpl {
 
         final HttpRequest request = buildGetHttpRequest(URI.create(urlToEndpoints + "v1/artists/0TnOYISbd1XYRBk9myaseg"));
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
-            return response;
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
         } catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get artist");
             throw new RuntimeException(e);

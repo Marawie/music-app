@@ -1,7 +1,7 @@
 package music.musicapp.controller;
 
 import lombok.RequiredArgsConstructor;
-import music.musicapp.model.user.User;
+import music.musicapp.dto.UserDto;
 import music.musicapp.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +26,5 @@ public class UserController {
         return new ResponseEntity<>(userService.globalSearch(query), HttpStatus.OK);
     }
 
-    @PostMapping("/add/friend/{currentUserId}")
-    @PreAuthorize("hasAuthority('user:create')")
-    public ResponseEntity<User> addToFriendList(@RequestParam String username, @PathVariable Long currentUserId) {
-        try {
-            User updatedUser = userService.addUserToFriends(username, currentUserId);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
-        } catch (NotFound e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+
 }
