@@ -1,6 +1,7 @@
 package music.musicapp.dto;
 
 import lombok.*;
+import music.musicapp.model.user.FriendshipRequestState;
 
 @Builder
 @Setter
@@ -10,5 +11,5 @@ import lombok.*;
 public class FriendshipDto {
     private String username;
     private String friendName;
-    private String state;
+    private FriendshipRequestState state;
 }

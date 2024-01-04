@@ -1,7 +1,7 @@
 package music.musicapp.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import music.musicapp.model.user.FriendshipRequestState;
 import music.musicapp.model.user.User;
 
 import java.util.Set;
@@ -24,4 +24,5 @@ public class UserDto {
     private String email;
 
     private Set<User> userSet;
+    private FriendshipRequestState state;
 }

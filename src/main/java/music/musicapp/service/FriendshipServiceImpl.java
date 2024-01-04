@@ -1,5 +1,6 @@
 package music.musicapp.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.FriendshipDto;
 import music.musicapp.dto.UserDto;
@@ -39,17 +40,45 @@ public class FriendshipServiceImpl implements FriendshipService {
         final Friendship friendshipForFriend = new Friendship(friend, loggedUser, FriendshipRequestState.ACCEPTATION_REQUIRED);
         friendshipRepository.saveAll(List.of(friendship, friendshipForFriend));
 
-
         return modelMapper.map(friendship, FriendshipDto.class);
     }
 
     @Override
     public UserDto acceptFriendshipRequest(Principal principal, Long friendId) {
-        return null;
+        final ModelMapper modelMapper = new ModelMapper();
+
+        final User loggedUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
+        Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
+
+        friendshipForUser.setFriendshipRequestState(FriendshipRequestState.ACCEPTED);
+        friendshipSForUserFriend.setFriendshipRequestState(FriendshipRequestState.ACCEPTED);
+
+        return modelMapper.map(friendshipSForUserFriend.getUser(), UserDto.class);
     }
 
     @Override
+    @PostConstruct
     public UserDto rejectFriendshipRequest(Principal principal, Long friendId) {
-        return null;
+        final ModelMapper modelMapper = new ModelMapper();
+
+        final User loggedUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
+        Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
+
+        friendshipForUser.setFriendshipRequestState(FriendshipRequestState.REJECTED_BY_YOU);
+        friendshipSForUserFriend.setFriendshipRequestState(FriendshipRequestState.REJECTED_BY_USER);
+
+        return modelMapper.map(friendshipSForUserFriend.getUser(), UserDto.class);
     }
 }
