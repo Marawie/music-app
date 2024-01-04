@@ -63,7 +63,6 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    @PostConstruct
     public UserDto rejectFriendshipRequest(Principal principal, Long friendId) {
         final ModelMapper modelMapper = new ModelMapper();
 
