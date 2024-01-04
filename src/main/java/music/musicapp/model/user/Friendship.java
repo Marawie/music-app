@@ -1,12 +1,10 @@
 package music.musicapp.model.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+
 @Entity
 @Table(name = "friendship", schema = "music")
 @NoArgsConstructor
@@ -29,6 +27,8 @@ public class Friendship {
     @Enumerated(EnumType.STRING)
     @Column(name = "state")
     private FriendshipRequestState friendshipRequestState;
+
+
 
     public Friendship(User friend, User user, FriendshipRequestState friendshipRequestState) {
         this.friend = friend;
