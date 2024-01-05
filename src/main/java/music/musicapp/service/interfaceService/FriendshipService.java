@@ -4,6 +4,7 @@ import music.musicapp.dto.FriendshipDto;
 import music.musicapp.dto.UserDto;
 
 import java.security.Principal;
+import java.util.Set;
 
 public interface FriendshipService {
 
@@ -13,4 +14,7 @@ public interface FriendshipService {
 
     UserDto rejectFriendshipRequest(Principal principal, Long friendId);
 
+    UserDto withdrawnRequestByUser(Principal principal, Long friendId);
+
+    Set<UserDto> getAllFriendship(Principal principal);
 }

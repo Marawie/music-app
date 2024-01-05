@@ -9,4 +9,5 @@ public enum FriendshipRequestState {
     REJECTED_BY_YOU,
     REJECTED_BY_USER,
     ACCEPTATION_REQUIRED,
+    WITHDRAWN
 }
