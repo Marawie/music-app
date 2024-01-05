@@ -30,14 +30,11 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public FriendshipDto addUserToFriend(Principal principal, Long friendId) {
-
         final ModelMapper modelMapper = new ModelMapper();
 
-        final User loggedUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        final User loggedUser = getUser(principal);
+        final User friend = getFriend(friendId);
 
-        final User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
         final Friendship friendship = new Friendship(loggedUser, friend, FriendshipRequestState.WAITING_FOR_RESPONSE);
         final Friendship friendshipForFriend = new Friendship(friend, loggedUser, FriendshipRequestState.ACCEPTATION_REQUIRED);
         friendshipRepository.saveAll(List.of(friendship, friendshipForFriend));
@@ -49,11 +46,9 @@ public class FriendshipServiceImpl implements FriendshipService {
     public UserDto acceptFriendshipRequest(Principal principal, Long friendId) {
         final ModelMapper modelMapper = new ModelMapper();
 
-        final User loggedUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+      final User loggedUser = getUser(principal);
+      final User friend = getFriend(friendId);
 
-        final User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
         Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
@@ -68,11 +63,8 @@ public class FriendshipServiceImpl implements FriendshipService {
     public UserDto rejectFriendshipRequest(Principal principal, Long friendId) {
         final ModelMapper modelMapper = new ModelMapper();
 
-        final User loggedUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        final User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        final User loggedUser = getUser(principal);
+        final User friend = getFriend(friendId);
 
         Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
         Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
@@ -87,17 +79,14 @@ public class FriendshipServiceImpl implements FriendshipService {
     public UserDto withdrawnRequestByUser(Principal principal, Long friendId) {
         final ModelMapper modelMapper = new ModelMapper();
 
-        final User loggedUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        final User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        final User loggedUser = getUser(principal);
+        final User friend = getFriend(friendId);
 
         Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
         Friendship friendshipForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
 
         if (friendshipForUserFriend.getFriendshipRequestState() != FriendshipRequestState.ACCEPTED
-            && friendshipForUser.getFriendshipRequestState() != FriendshipRequestState.ACCEPTED) {
+                && friendshipForUser.getFriendshipRequestState() != FriendshipRequestState.ACCEPTED) {
 
             friendshipForUser.setFriendshipRequestState(FriendshipRequestState.WITHDRAWN);
             friendshipForUserFriend.setFriendshipRequestState(FriendshipRequestState.WITHDRAWN);
@@ -110,9 +99,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     public Set<UserDto> getAllFriendship(Principal principal) {
         final ModelMapper modelMapper = new ModelMapper();
 
-        final User loggedUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
+        final User loggedUser = getUser(principal);
         Set<Friendship> friends = loggedUser.getFriends();
 
         var users = friends.stream()
@@ -120,5 +107,15 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .collect(Collectors.toSet());
 
         return Collections.singleton(modelMapper.map(users, UserDto.class));
+    }
+
+    private User getUser(Principal principal) {
+        return userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+    }
+
+    private User getFriend(Long friendId) {
+        return userRepository.findById(friendId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
     }
 }
