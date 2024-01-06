@@ -46,17 +46,20 @@ public class FriendshipServiceImpl implements FriendshipService {
     public UserDto acceptFriendshipRequest(Principal principal, Long friendId) {
         final ModelMapper modelMapper = new ModelMapper();
 
-      final User loggedUser = getUser(principal);
-      final User friend = getFriend(friendId);
+        final User loggedUser = getUser(principal);
+        final User friend = getFriend(friendId);
 
 
         Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
-        Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
+        Friendship friendshipForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
 
         friendshipForUser.setFriendshipRequestState(FriendshipRequestState.ACCEPTED);
-        friendshipSForUserFriend.setFriendshipRequestState(FriendshipRequestState.ACCEPTED);
+        friendshipForUserFriend.setFriendshipRequestState(FriendshipRequestState.ACCEPTED);
 
-        return modelMapper.map(friendshipSForUserFriend.getUser(), UserDto.class);
+        friendshipRepository.save(friendshipForUser);
+        friendshipRepository.save(friendshipForUserFriend);
+
+        return modelMapper.map(friendshipForUserFriend.getUser(), UserDto.class);
     }
 
     @Override
@@ -67,12 +70,15 @@ public class FriendshipServiceImpl implements FriendshipService {
         final User friend = getFriend(friendId);
 
         Friendship friendshipForUser = friendshipRepository.findByUserAndUserFriends(loggedUser, friend);
-        Friendship friendshipSForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
+        Friendship friendshipForUserFriend = friendshipRepository.findByUserFriendsAndUser(friend, loggedUser);
 
         friendshipForUser.setFriendshipRequestState(FriendshipRequestState.REJECTED_BY_YOU);
-        friendshipSForUserFriend.setFriendshipRequestState(FriendshipRequestState.REJECTED_BY_USER);
+        friendshipForUserFriend.setFriendshipRequestState(FriendshipRequestState.REJECTED_BY_USER);
 
-        return modelMapper.map(friendshipSForUserFriend.getUser(), UserDto.class);
+        friendshipRepository.save(friendshipForUser);
+        friendshipRepository.save(friendshipForUserFriend);
+
+        return modelMapper.map(friendshipForUserFriend.getUser(), UserDto.class);
     }
 
     @Override
@@ -92,6 +98,9 @@ public class FriendshipServiceImpl implements FriendshipService {
             friendshipForUserFriend.setFriendshipRequestState(FriendshipRequestState.WITHDRAWN);
         }
 
+        friendshipRepository.save(friendshipForUser);
+        friendshipRepository.save(friendshipForUserFriend);
+
         return modelMapper.map(friendshipForUserFriend.getUser(), UserDto.class);
     }
 
@@ -100,9 +109,9 @@ public class FriendshipServiceImpl implements FriendshipService {
         final ModelMapper modelMapper = new ModelMapper();
 
         final User loggedUser = getUser(principal);
-        Set<Friendship> friends = loggedUser.getFriends();
+        final Set<Friendship> friends = loggedUser.getFriends();
 
-        var users = friends.stream()
+        final Set<User> users = friends.stream()
                 .map(Friendship::getFriend)
                 .collect(Collectors.toSet());
 

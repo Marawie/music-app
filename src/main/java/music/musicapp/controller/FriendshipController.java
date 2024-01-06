@@ -24,19 +24,19 @@ public class FriendshipController {
 
     }
 
-    @PostMapping("add/request")
+    @PostMapping("add/request/{friendId}")
     @PreAuthorize("hasAuthority('user:create')")
     public FriendshipDto sendRequestToFriendToGetFriendship(Principal principal, @PathVariable Long friendId) {
         return friendshipService.addUserToFriend(principal, friendId);
     }
 
-    @PostMapping("accept/request")
+    @PostMapping("accept/request/{friendId}")
     @PreAuthorize("hasAuthority('user:create')")
     public UserDto acceptRequestFromFriend(Principal principal, @PathVariable Long friendId) {
         return friendshipService.acceptFriendshipRequest(principal, friendId);
     }
 
-    @PostMapping("reject/request")
+    @PostMapping("reject/request/{friendId}")
     @PreAuthorize("hasAuthority('user:create')")
     public UserDto rejectRequestFromFriend(Principal principal, @PathVariable Long friendId) {
         return friendshipService.rejectFriendshipRequest(principal, friendId);
