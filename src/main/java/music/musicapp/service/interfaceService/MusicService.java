@@ -1,12 +1,11 @@
 package music.musicapp.service.interfaceService;
 
-import music.musicapp.model.Music;
-import music.musicapp.model.Playlist;
+import music.musicapp.dto.MusicDto;
+import music.musicapp.dto.MusicRequest;
 
-import java.util.Optional;
+import java.io.IOException;
 
 public interface MusicService {
+    MusicDto createNewMusic(MusicRequest musicRequest) throws IOException;
 
-    // TODO: 06.01.2024 zastanwoic sie nad metodami  
-    Optional<Music> addMusicWhichIsLikedToPlaylist(Playlist playlist);
 }
