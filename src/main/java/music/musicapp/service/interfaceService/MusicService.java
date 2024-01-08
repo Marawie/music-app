@@ -1,11 +1,14 @@
 package music.musicapp.service.interfaceService;
 
-import music.musicapp.dto.MusicDto;
-import music.musicapp.dto.MusicRequest;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface MusicService {
-    MusicDto createNewMusic(MusicRequest musicRequest) throws IOException;
+    String uploadFile(String path, MultipartFile file, String musicType, String musicText) throws IOException;
+
+    InputStream getResourceFile(String path, String name) throws FileNotFoundException;
 
 }

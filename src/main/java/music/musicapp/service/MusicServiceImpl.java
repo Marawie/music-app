@@ -1,71 +1,101 @@
 package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
-import music.musicapp.dto.MusicDto;
-import music.musicapp.dto.MusicRequest;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
+import music.musicapp.model.Genre;
 import music.musicapp.model.Music;
 import music.musicapp.repository.MusicRepository;
 import music.musicapp.service.interfaceService.MusicService;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.sax.BodyContentHandler;
-import org.modelmapper.ModelMapper;
+import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
-import org.xml.sax.SAXException;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 @RequiredArgsConstructor
 public class MusicServiceImpl implements MusicService {
+
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("mp3", "wav", "flac");
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("audio/mpeg", "audio/wav", "audio/flac");
+    private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
     private final MusicRepository musicRepository;
 
 
     @Override
-    public MusicDto createNewMusic(MusicRequest musicRequest) throws IOException {
-        Music music;
-        final ModelMapper modelMapper = new ModelMapper();
-        if (fileValidator(musicRequest.getMusicFile())) {
-            final byte[] bytes = Files.readAllBytes(musicRequest.getMusicFile().toPath());
+    public String uploadFile(String path, MultipartFile file, String musicType, String musicText) throws IOException {
+        Tika tika = new Tika();
 
-            music = Music.builder()
-                    .id(null)
-                    .audio(bytes)
-                    .textOfMusic(musicRequest.getTextOfMusic())
-                    .title(musicRequest.getName())
-                    .genre(musicRequest.getGenre())
-                    .musicAddedFromArtist(musicRequest.getMusicAddedFromArtist())
-                    .build();
-            musicRepository.save(music);
-        } else throw new RestException(ExceptionEnum.FILE_REQUEST_DENIED);
+        String mimeType = tika.detect(file.getBytes());
+        validateFile(file, mimeType);
+        final String fileName = file.getOriginalFilename();
 
-        return modelMapper.map(music, MusicDto.class);
+        final String filePath = path + File.separator + fileName;
+
+        File musicFile = new File(path);
+
+        if (!musicFile.exists()) {
+            musicFile.mkdirs();
+        }
+        Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
+        musicRepository.save(Music.builder()
+                .id(null)
+                .audio(file.getBytes())
+                .title(fileName)
+                .musicAddedFromArtist(LocalDate.now())
+                .textOfMusic(musicText)
+                .genre(new Genre(musicType))
+                .build());
+
+        return fileName;
     }
 
 
-    private boolean fileValidator(File file) throws IOException, TikaException, SAXException {
-        BodyContentHandler handler = new BodyContentHandler();
-        Metadata metadata = new Metadata();
-        FileInputStream inputStream = new FileInputStream(file);
-        Parser parser = new AutoDetectParser();
-        ParseContext context = new ParseContext();
+    @Override
+    public InputStream getResourceFile(String path, String name) throws FileNotFoundException {
+        String filePath = path + File.separator + name;
+        return new FileInputStream(filePath);
+    }
 
-        parser.parse(inputStream, handler, metadata, context);
-        inputStream.close();
+    private void validateFile(MultipartFile file, String mimeType) {
+        validateExtension(file);
+        isMusicMimeType(mimeType);
+        validateFileSize(file);
+    }
 
-        String format = metadata.get("Content-Type");
-        long fileSize = file.length();
-        if ("audio/mpeg".equals(format) && fileSize > 0) {
-            return true;
-        } else return false;
+    private void validateExtension(MultipartFile file) {
+        String fileExtension = getFileExtension(requireNonNull(file.getOriginalFilename()));
+        if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+            throw new RestException(ExceptionEnum.WRONG_EXTENSION_FILE);
+        }
+    }
+
+    private boolean isMusicMimeType(String mimeType) {
+        return ALLOWED_MIME_TYPES.contains(mimeType);
+    }
+
+
+    private void validateFileSize(MultipartFile file) {
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new RestException(ExceptionEnum.FILE_TOO_BIG);
+        }
+    }
+
+    private String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return "";
+        }
+        return fileName.substring(lastDotIndex + 1);
     }
 }
 
