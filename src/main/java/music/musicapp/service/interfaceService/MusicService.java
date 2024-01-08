@@ -1,12 +1,14 @@
 package music.musicapp.service.interfaceService;
 
-import music.musicapp.model.Music;
-import music.musicapp.model.Playlist;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public interface MusicService {
+    String uploadFile(String path, MultipartFile file, String musicType, String musicText) throws IOException;
 
-    // TODO: 06.01.2024 zastanwoic sie nad metodami  
-    Optional<Music> addMusicWhichIsLikedToPlaylist(Playlist playlist);
+    InputStream getResourceFile(String path, String name) throws FileNotFoundException;
+
 }
