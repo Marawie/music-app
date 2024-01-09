@@ -15,7 +15,6 @@ import java.util.Optional;
 public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
 
-
     @Override
     public Optional<Author> addAuthorOptionalToDatabase(RequestAuthor author) {
         return Optional.empty();

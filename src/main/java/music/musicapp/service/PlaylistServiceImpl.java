@@ -13,7 +13,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PlaylistServiceImpl implements PlaylistService {
     private final PlaylistRepository playlistRepository;
-
     @Override
     public Optional<User> checkUserPlaylistByMusicYouLiked(Music music) {
         return Optional.empty();

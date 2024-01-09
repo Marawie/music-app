@@ -9,5 +9,3 @@ public record GenresResponse(String[] genres) {
         return Arrays.toString(genres);
     }
 }
-
-

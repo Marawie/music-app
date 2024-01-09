@@ -9,5 +9,4 @@ public interface MusicService {
     Resource uploadMusic(MultipartFile file, String genre, String getTextMusic) throws IOException;
 
     Resource downloadMusic(Long id) throws IOException;
-
 }

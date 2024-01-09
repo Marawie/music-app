@@ -15,6 +15,5 @@ public class MusicDto {
     private LocalDate musicAddedFromArtist;
     private Genre genre;
     private String textOfMusic;
-
-
+    
 }

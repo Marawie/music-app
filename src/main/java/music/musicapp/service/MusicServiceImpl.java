@@ -28,14 +28,12 @@ public class MusicServiceImpl implements MusicService {
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
     private final MusicRepository musicRepository;
 
-
     @Override
     public Resource downloadMusic(Long id) {
         byte[] audio = musicRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.FILE_READ_ERROR)).getAudio();
         return new ByteArrayResource(audio);
     }
-
 
     @Override
     public Resource uploadMusic(MultipartFile file, String genre, String getTextMusic) throws IOException {
@@ -96,4 +94,3 @@ public class MusicServiceImpl implements MusicService {
         return fileName.substring(lastDotIndex + 1);
     }
 }
-
