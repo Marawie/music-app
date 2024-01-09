@@ -8,14 +8,12 @@ import music.musicapp.model.Music;
 import music.musicapp.repository.MusicRepository;
 import music.musicapp.service.interfaceService.MusicService;
 import org.apache.tika.Tika;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,38 +30,35 @@ public class MusicServiceImpl implements MusicService {
 
 
     @Override
-    public String uploadFile(String path, MultipartFile file, String musicType, String musicText) throws IOException {
-        Tika tika = new Tika();
-
-        String mimeType = tika.detect(file.getBytes());
-        validateFile(file, mimeType);
-        final String fileName = file.getOriginalFilename();
-
-        final String filePath = path + File.separator + fileName;
-
-        File musicFile = new File(path);
-
-        if (!musicFile.exists()) {
-            musicFile.mkdirs();
-        }
-        Files.copy(file.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
-        musicRepository.save(Music.builder()
-                .id(null)
-                .audio(file.getBytes())
-                .title(fileName)
-                .musicAddedFromArtist(LocalDate.now())
-                .textOfMusic(musicText)
-                .genre(new Genre(musicType))
-                .build());
-
-        return fileName;
+    public Resource downloadMusic(Long id) {
+        byte[] audio = musicRepository.findById(id).orElseThrow(
+                () -> new RestException(ExceptionEnum.FILE_READ_ERROR)).getAudio();
+        return new ByteArrayResource(audio);
     }
 
 
     @Override
-    public InputStream getResourceFile(String path, String name) throws FileNotFoundException {
-        String filePath = path + File.separator + name;
-        return new FileInputStream(filePath);
+    public Resource uploadMusic(MultipartFile file, String genre, String getTextMusic) throws IOException {
+
+        if (!file.getResource().exists()) {
+            throw new RestException(ExceptionEnum.FILE_REQUEST_DENIED);
+        }
+
+        final Tika tika = new Tika();
+        final String mimeType = tika.detect(file.getInputStream());
+
+        validateFile(file, mimeType);
+
+        final Music music = Music.builder()
+                .id(null)
+                .genre(new Genre(genre))
+                .title(file.getName())
+                .audio(file.getBytes())
+                .textOfMusic(getTextMusic)
+                .build();
+        musicRepository.save(music);
+
+        return new ByteArrayResource(music.getAudio());
     }
 
     private void validateFile(MultipartFile file, String mimeType) {
@@ -80,7 +75,10 @@ public class MusicServiceImpl implements MusicService {
     }
 
     private boolean isMusicMimeType(String mimeType) {
-        return ALLOWED_MIME_TYPES.contains(mimeType);
+        if (!ALLOWED_MIME_TYPES.contains(mimeType)) {
+            throw new RestException(ExceptionEnum.WRONG_MIME_TYPES);
+        } else
+            return true;
     }
 
 

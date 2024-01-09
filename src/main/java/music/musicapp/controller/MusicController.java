@@ -1,19 +1,14 @@
 package music.musicapp.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import music.musicapp.exception.ExceptionEnum;
-import music.musicapp.exception.RestException;
 import music.musicapp.service.MusicServiceImpl;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,21 +16,17 @@ import java.io.InputStream;
 @PreAuthorize("hasRole('USER_PREMIUM')")
 public class MusicController {
 
-    @Value("${application.project.music}")
-    private String path;
     private final MusicServiceImpl musicService;
 
-    @PostMapping("add-music")
+    @PostMapping("upload-music")
     @PreAuthorize("hasAuthority('user_premium:create')")
-    public ResponseEntity<String> createNewMusic(String path, MultipartFile file, @RequestParam String musicType,@RequestParam String musicText) throws IOException {
-        String uploadedFileName = musicService.uploadFile(path, file, musicType, musicText);
-        return ResponseEntity.ok(new RestException(ExceptionEnum.FILE_UPLOADED) + uploadedFileName);
+    public Resource uploadMusic(@RequestParam MultipartFile file, @RequestParam String genre, @RequestParam String textOfMusic) throws IOException {
+        return musicService.uploadMusic(file, genre, textOfMusic);
     }
 
-    @GetMapping("{fileName}")
-    public void serveFileHandler(@PathVariable String fileName, HttpServletResponse response) throws IOException {
-        InputStream inputStream = musicService.getResourceFile(path, fileName);
-        response.setContentType("audio/mpeg");
-        StreamUtils.copy(inputStream, response.getOutputStream());
+    @GetMapping(value = "/download-music/{id}", produces = MediaType.ALL_VALUE)
+    @PreAuthorize("hasAuthority('user_premium:read')")
+    public Resource downloadImage(@PathVariable Long id) {
+        return musicService.downloadMusic(id);
     }
 }
