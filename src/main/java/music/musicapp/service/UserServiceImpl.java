@@ -25,7 +25,6 @@ public class UserServiceImpl implements UserService {
     private final AuthorRepository authorRepository;
     private final UserRepository userRepository;
 
-
     @Override
     public List<Object> globalSearch(String query) {
         final List<Object> results = new ArrayList<>();
@@ -52,4 +51,3 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 }
-

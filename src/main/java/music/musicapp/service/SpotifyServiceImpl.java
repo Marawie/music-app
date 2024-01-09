@@ -92,4 +92,3 @@ public class SpotifyServiceImpl {
                 .build();
     }
 }
-

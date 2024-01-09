@@ -16,7 +16,6 @@ public enum ExceptionEnum {
     WRONG_EXTENSION_FILE(HttpStatus.BAD_REQUEST, "Your file has to be in MP3, FLAC, WAV"),
     WRONG_MIME_TYPES(HttpStatus.BAD_REQUEST, "These types are allowed: audio/mpeg, audio/wav, audio/flac"),
     FILE_TOO_BIG(HttpStatus.BAD_REQUEST, "Your file is too big, we only accepted 25mb by one file"),
-
     FILE_READ_ERROR(HttpStatus.CONFLICT, "Error while trying to read file")
     ;
     private final HttpStatus httpStatus;
