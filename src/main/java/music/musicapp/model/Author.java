@@ -43,5 +43,5 @@ public class Author {
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "author_podcast_id")
-    private Set<AlbumPodcast>  albumPodcasts= new HashSet<>();
+    private Set<AlbumPodcast> albumPodcasts = new HashSet<>();
 }

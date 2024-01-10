@@ -6,6 +6,6 @@ import music.musicapp.model.Author;
 import java.util.Optional;
 
 public interface AuthorService {
-    Optional<Author> addAuthorOptionalToDatabase(RequestAuthor author);
+    Optional<Author> addPremiumUserToAuthor(RequestAuthor author);
     Optional<Author> removeAuthorByName(String nameOfArtist);
 }
