@@ -1,12 +1,8 @@
 package music.musicapp.service.interfaceService;
 
-import org.springframework.core.io.Resource;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import music.musicapp.dto.PlaylistDto;
+import music.musicapp.model.Music;
 
 public interface MusicService {
-    Resource uploadMusic(MultipartFile file, String genre, String getTextMusic) throws IOException;
-
-    Resource downloadMusic(Long id) throws IOException;
+     PlaylistDto addMusicToPlaylist(Music music, Long id);
 }

@@ -16,7 +16,7 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
 
     @Override
-    public Optional<Author> addAuthorOptionalToDatabase(RequestAuthor author) {
+    public Optional<Author> addPremiumUserToAuthor(RequestAuthor author) {
         return Optional.empty();
     }
 
