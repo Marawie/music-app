@@ -2,6 +2,7 @@ package music.musicapp.controller;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.UserDto;
 import music.musicapp.model.Playlist;
 import music.musicapp.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class UserController {
     }
     @PostMapping("create/new/playlist")
     @PreAuthorize("hasAuthority('user:create')")
-    public void changePassword(@RequestParam Playlist playlist, Principal principal) {
-        userService.addPlaylist(principal, playlist);
+    public UserDto addPlaylist(@RequestParam Playlist playlist, Principal principal) {
+     return userService.addPlaylist(principal, playlist);
     }
 }

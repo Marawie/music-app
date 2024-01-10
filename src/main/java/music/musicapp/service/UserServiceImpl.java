@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final PodcastRepository podcastRepository;
     private final AuthorRepository authorRepository;
     private final UserRepository userRepository;
+    private final PlaylistRepository playlistRepository;
 
     @Override
     public List<Object> globalSearch(String query) {
@@ -57,11 +58,43 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto addPlaylist(Principal principal, Playlist playlist) {
         final ModelMapper mapper = new ModelMapper();
-        userRepository.findByEmail(principal.getName())
+
+        final User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
+        user.getPlaylists().add(playlist);
+        userRepository.save(user);
 
-        var user = userRepository.addPlaylist(playlist);
-    return mapper.map(user, UserDto.class);
+        return mapper.map(user, UserDto.class);
+    }
+
+    @Override
+    public UserDto removePlaylist(Principal principal, Long playlistId, Long id) {
+        final ModelMapper mapper = new ModelMapper();
+
+        final User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+        user.getPlaylists().remove(playlist);
+        userRepository.save(user);
+
+        return mapper.map(user, UserDto.class);
+    }
+
+    //TODO: przemyslec metode
+    @Override
+    public UserDto updatePlaylistName(Principal principal, Long playlistId) {
+        final ModelMapper mapper = new ModelMapper();
+
+        final User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+        return mapper.map(user, UserDto.class);
     }
 }
