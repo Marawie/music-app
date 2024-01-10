@@ -2,11 +2,14 @@ package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.UserDto;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
+import music.musicapp.model.Playlist;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,5 +52,16 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserDto addPlaylist(Principal principal, Playlist playlist) {
+        final ModelMapper mapper = new ModelMapper();
+        userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+
+        var user = userRepository.addPlaylist(playlist);
+    return mapper.map(user, UserDto.class);
     }
 }

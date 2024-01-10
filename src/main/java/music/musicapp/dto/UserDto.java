@@ -1,6 +1,7 @@
 package music.musicapp.dto;
 
 import lombok.*;
+import music.musicapp.model.Playlist;
 import music.musicapp.model.user.FriendshipRequestState;
 import music.musicapp.model.user.User;
 
@@ -24,4 +25,5 @@ public class UserDto {
 
     private Set<User> userSet;
     private FriendshipRequestState state;
+    private Set<Playlist> playlists;
 }
