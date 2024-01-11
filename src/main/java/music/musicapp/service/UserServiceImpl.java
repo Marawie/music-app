@@ -2,11 +2,14 @@ package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.UserDto;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
+import music.musicapp.model.Playlist;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.*;
 import music.musicapp.service.interfaceService.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final PodcastRepository podcastRepository;
     private final AuthorRepository authorRepository;
     private final UserRepository userRepository;
+    private final PlaylistRepository playlistRepository;
 
     @Override
     public List<Object> globalSearch(String query) {
@@ -49,5 +53,53 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserDto addPlaylist(Principal principal, Playlist playlist) {
+        final ModelMapper mapper = new ModelMapper();
+
+        final User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        user.getPlaylists().add(playlist);
+        userRepository.save(user);
+
+        return mapper.map(user, UserDto.class);
+    }
+
+    @Override
+    public UserDto removePlaylist(Principal principal, Long playlistId) {
+        final ModelMapper mapper = new ModelMapper();
+
+        final User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+        user.getPlaylists().remove(playlist);
+        userRepository.save(user);
+
+        return mapper.map(user, UserDto.class);
+    }
+
+    //TODO: przemyslec metode
+    @Override
+    public UserDto updatePlaylistName(Principal principal, Long playlistId, String nameOfMusic) {
+        final ModelMapper mapper = new ModelMapper();
+
+        final User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+
+        playlist.setName(nameOfMusic);
+        playlistRepository.save(playlist);
+
+
+        return mapper.map(user, UserDto.class);
     }
 }

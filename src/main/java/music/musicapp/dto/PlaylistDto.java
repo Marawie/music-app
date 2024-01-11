@@ -11,6 +11,7 @@ import java.util.Set;
 @Builder
 public class PlaylistDto {
     private boolean isPrivate;
+    private String name;
     private User user;
     private Set<Music> musics;
 }
