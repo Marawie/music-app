@@ -32,9 +32,22 @@ public class UserController {
     public void changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
         userService.changePassword(request, principal);
     }
+
     @PostMapping("create/new/playlist")
     @PreAuthorize("hasAuthority('user:create')")
     public UserDto addPlaylist(@RequestParam Playlist playlist, Principal principal) {
-     return userService.addPlaylist(principal, playlist);
+        return userService.addPlaylist(principal, playlist);
+    }
+
+    @DeleteMapping("remove/playlist/{id}")
+    @PreAuthorize("hasAuthority('user:delete')")
+    public UserDto removePlaylist(@PathVariable Long id, Principal principal) {
+        return userService.removePlaylist(principal, id);
+    }
+
+    @PutMapping("update/playlist/{id}")
+    @PreAuthorize("hasAuthority('user:update')")
+    public UserDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
+        return userService.updatePlaylistName(principal, id, nameOfPlaylist);
     }
 }

@@ -12,6 +12,6 @@ public interface UserService {
     void changePassword(ChangePasswordRequest request,  Principal connectedUser);
 
     UserDto addPlaylist(Principal principal, Playlist playlist);
-    UserDto removePlaylist(Principal principal, Long playlistId, Long id);
-    UserDto updatePlaylistName(Principal principal, Long playlistId);
+    UserDto removePlaylist(Principal principal, Long playlistId);
+    UserDto updatePlaylistName(Principal principal, Long playlistId, String name);
 }

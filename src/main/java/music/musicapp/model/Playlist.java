@@ -18,6 +18,8 @@ public class Playlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     private boolean isPrivate;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -27,8 +29,8 @@ public class Playlist {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToMany
-    @JoinTable( name = "playlist_music", joinColumns =
-            @JoinColumn(name = "playlist_id"),
+    @JoinTable(name = "playlist_music", joinColumns =
+    @JoinColumn(name = "playlist_id"),
             inverseJoinColumns = @JoinColumn(name = "music_id")
     )
     private Set<Music> musics = new HashSet<>();

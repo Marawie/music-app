@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto removePlaylist(Principal principal, Long playlistId, Long id) {
+    public UserDto removePlaylist(Principal principal, Long playlistId) {
         final ModelMapper mapper = new ModelMapper();
 
         final User user = userRepository.findByEmail(principal.getName())
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
     //TODO: przemyslec metode
     @Override
-    public UserDto updatePlaylistName(Principal principal, Long playlistId) {
+    public UserDto updatePlaylistName(Principal principal, Long playlistId, String nameOfMusic) {
         final ModelMapper mapper = new ModelMapper();
 
         final User user = userRepository.findByEmail(principal.getName())
@@ -94,6 +94,11 @@ public class UserServiceImpl implements UserService {
 
         final Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+
+        playlist.setName(nameOfMusic);
+        playlistRepository.save(playlist);
+
 
         return mapper.map(user, UserDto.class);
     }
