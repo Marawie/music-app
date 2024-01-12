@@ -2,16 +2,18 @@ package music.musicapp.controller;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.PlaylistDto;
+import music.musicapp.dto.SearchResultDto;
 import music.musicapp.dto.UserDto;
 import music.musicapp.model.Playlist;
 import music.musicapp.service.UserServiceImpl;
+import music.musicapp.service.interfaceService.SearchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,12 +21,13 @@ import java.util.List;
 @PreAuthorize("hasRole('USER')")
 public class UserController {
     private final UserServiceImpl userService;
+    private final SearchService searchService;
 
 
     @GetMapping("search")
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<List<Object>> globalSearch(@RequestParam String query) {
-        return new ResponseEntity<>(userService.globalSearch(query), HttpStatus.OK);
+    public ResponseEntity<SearchResultDto> globalSearch(@RequestParam String query) {
+        return new ResponseEntity<>(searchService.searchEngine(query), HttpStatus.OK);
     }
 
     @PatchMapping("change/password")
@@ -47,7 +50,7 @@ public class UserController {
 
     @PutMapping("update/playlist/{id}")
     @PreAuthorize("hasAuthority('user:update')")
-    public UserDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
+    public PlaylistDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
         return userService.updatePlaylistName(principal, id, nameOfPlaylist);
     }
 }

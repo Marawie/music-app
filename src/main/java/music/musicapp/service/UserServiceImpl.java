@@ -2,6 +2,7 @@ package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.PlaylistDto;
 import music.musicapp.dto.UserDto;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
@@ -15,8 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,17 +28,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
 
-    @Override
-    public List<Object> globalSearch(String query) {
-        final List<Object> results = new ArrayList<>();
-
-        results.addAll(genreRepository.findByNameContaining(query));
-        results.addAll(musicRepository.findByTitleContaining(query));
-        results.addAll(podcastRepository.findByNameContaining(query));
-        results.addAll(authorRepository.findByNameContaining(query));
-
-        return results;
-    }
 
     @Override
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
@@ -84,22 +72,20 @@ public class UserServiceImpl implements UserService {
         return mapper.map(user, UserDto.class);
     }
 
-    //TODO: przemyslec metode
     @Override
-    public UserDto updatePlaylistName(Principal principal, Long playlistId, String nameOfMusic) {
+    public PlaylistDto updatePlaylistName(Principal principal, Long playlistId, String nameOfMusic) {
         final ModelMapper mapper = new ModelMapper();
 
-        final User user = userRepository.findByEmail(principal.getName())
+       userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
 
-
         playlist.setName(nameOfMusic);
-        playlistRepository.save(playlist);
+        Playlist changedPlaylistName = playlistRepository.save(playlist);
 
 
-        return mapper.map(user, UserDto.class);
+        return mapper.map(changedPlaylistName, PlaylistDto.class);
     }
 }
