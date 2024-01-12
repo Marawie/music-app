@@ -31,6 +31,11 @@ public class Music {
     private String textOfMusic;
 
     private LocalDate musicAddedFromArtist;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany
+    private Set<Author> author = new HashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne

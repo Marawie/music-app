@@ -44,4 +44,15 @@ public class Author {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "author_podcast_id")
     private Set<AlbumPodcast> albumPodcasts = new HashSet<>();
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "music_id")
+    private Music music;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "podcast_id")
+    private Podcast podcast;
 }

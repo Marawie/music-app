@@ -9,6 +9,7 @@ import music.musicapp.model.Playlist;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.PlaylistRepository;
 import music.musicapp.repository.UserRepository;
+import music.musicapp.service.interfaceService.MusicService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +17,15 @@ import java.security.Principal;
 
 @Service
 @RequiredArgsConstructor
-public class MusicServiceImpl {
+public class MusicServiceImpl implements MusicService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
 
-
+    @Override
     public PlaylistDto addMusicToPlaylist(Principal principal, Music music, Long id) {
         final ModelMapper modelMapper = new ModelMapper();
 
-        User user = userRepository.findByEmail(principal.getName())
+       userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final Playlist playlist = playlistRepository.
@@ -35,4 +36,6 @@ public class MusicServiceImpl {
         return modelMapper.map(added, PlaylistDto.class);
 
     }
+
+
 }
