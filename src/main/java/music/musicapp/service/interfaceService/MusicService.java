@@ -6,5 +6,5 @@ import music.musicapp.model.Music;
 import java.security.Principal;
 
 public interface MusicService {
-     PlaylistDto addMusicToPlaylist(Principal principal,Music music, Long playlistId);
+     PlaylistDto addMusicToPlaylist(Principal principal, Music music, Long playlistId);
 }
