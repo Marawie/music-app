@@ -2,6 +2,7 @@ package music.musicapp.controller;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
+import music.musicapp.dto.PlaylistDto;
 import music.musicapp.dto.SearchResultDto;
 import music.musicapp.dto.UserDto;
 import music.musicapp.model.Playlist;
@@ -13,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,7 +50,7 @@ public class UserController {
 
     @PutMapping("update/playlist/{id}")
     @PreAuthorize("hasAuthority('user:update')")
-    public UserDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
+    public PlaylistDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
         return userService.updatePlaylistName(principal, id, nameOfPlaylist);
     }
 }
