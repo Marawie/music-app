@@ -1,9 +1,7 @@
 package music.musicapp.model.user;
 
 import lombok.*;
-import music.musicapp.model.UserMusicHistory;
-import music.musicapp.model.UserPodcastHistory;
-import music.musicapp.model.Playlist;
+import music.musicapp.model.*;
 import music.musicapp.model.token.Token;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -46,6 +44,15 @@ public class User implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "music_list")
+    Set<Music> music = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "podcast_list")
+    Set<Podcast> podcast = new HashSet<>();
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(cascade = CascadeType.ALL)

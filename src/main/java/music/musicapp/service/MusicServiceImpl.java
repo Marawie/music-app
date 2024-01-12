@@ -25,7 +25,7 @@ public class MusicServiceImpl implements MusicService {
     public PlaylistDto addMusicToPlaylist(Principal principal, Music music, Long id) {
         final ModelMapper modelMapper = new ModelMapper();
 
-       userRepository.findByEmail(principal.getName())
+         userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final Playlist playlist = playlistRepository.
@@ -36,6 +36,4 @@ public class MusicServiceImpl implements MusicService {
         return modelMapper.map(added, PlaylistDto.class);
 
     }
-
-
 }

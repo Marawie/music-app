@@ -3,6 +3,7 @@ package music.musicapp.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import music.musicapp.model.user.User;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -39,4 +40,12 @@ public class Podcast {
     @ManyToOne
     @JoinColumn(name = "history_podcast")
     private UserPodcastHistory historyOfPodcast;
+
+    @ManyToOne
+    @JoinColumn(name = "podcast_list")
+    private User users;
+
+    @ManyToOne
+    @JoinColumn(name = "music_list")
+    private User user;
 }
