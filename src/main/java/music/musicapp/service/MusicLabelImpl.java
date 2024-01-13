@@ -36,9 +36,9 @@ public class MusicLabelImpl implements MusicLabel {
     }
 
     @Override
-    public Resource uploadMusic(MultipartFile file, String genre, String getTextMusic) throws IOException {
+    public Resource uploadMusic(MultipartFile file, String genre, String musicText) throws IOException {
 
-        if (!file.getResource().exists()) {
+        if (!file.isEmpty()) {
             throw new RestException(ExceptionEnum.FILE_REQUEST_DENIED);
         }
 
@@ -52,7 +52,7 @@ public class MusicLabelImpl implements MusicLabel {
                 .genre(new Genre(genre))
                 .title(file.getName())
                 .audio(file.getBytes())
-                .textOfMusic(getTextMusic)
+                .textOfMusic(musicText)
                 .build();
         musicRepository.save(music);
 
@@ -72,11 +72,10 @@ public class MusicLabelImpl implements MusicLabel {
         }
     }
 
-    private boolean isMusicMimeType(String mimeType) {
+    private void isMusicMimeType(String mimeType) {
         if (!ALLOWED_MIME_TYPES.contains(mimeType)) {
             throw new RestException(ExceptionEnum.WRONG_MIME_TYPES);
-        } else
-            return true;
+        }
     }
 
 
