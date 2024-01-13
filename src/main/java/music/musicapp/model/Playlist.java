@@ -35,4 +35,13 @@ public class Playlist {
             inverseJoinColumns = @JoinColumn(name = "music_id")
     )
     private Set<Music> musics = new HashSet<>();
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany
+    @JoinTable(name = "playlist_podcast", joinColumns =
+    @JoinColumn(name = "playlist_id"),
+            inverseJoinColumns = @JoinColumn(name = "podcast_id")
+    )
+    private Set<Podcast> podcasts = new HashSet<>();
 }

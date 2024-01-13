@@ -14,15 +14,10 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserDto {
     private Long id;
-
     private String username;
-
     private String firstname;
-
     private String lastname;
-
     private String email;
-
     private Set<User> userSet;
     private FriendshipRequestState state;
     private Set<Playlist> playlists;
