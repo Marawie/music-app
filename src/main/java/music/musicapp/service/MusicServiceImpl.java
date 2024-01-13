@@ -37,7 +37,6 @@ public class MusicServiceImpl implements MusicService {
 
         playlist.getMusics().add(music);
         playlistRepository.save(playlist);
-        musicRepository.save(music);
 
         return modelMapper.map(playlist, PlaylistDto.class);
     }

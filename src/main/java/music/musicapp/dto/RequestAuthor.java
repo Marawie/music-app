@@ -1,7 +1,5 @@
 package music.musicapp.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
