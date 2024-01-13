@@ -48,4 +48,9 @@ public class Podcast {
     @ManyToOne
     @JoinColumn(name = "music_list")
     private User user;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "podcasts")
+    private Set<Playlist> playlists = new HashSet<>();
 }

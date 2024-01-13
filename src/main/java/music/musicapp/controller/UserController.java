@@ -6,8 +6,9 @@ import music.musicapp.dto.PlaylistDto;
 import music.musicapp.dto.SearchResultDto;
 import music.musicapp.dto.UserDto;
 import music.musicapp.model.Playlist;
-import music.musicapp.service.UserServiceImpl;
+import music.musicapp.service.interfaceService.PlaylistService;
 import music.musicapp.service.interfaceService.SearchService;
+import music.musicapp.service.interfaceService.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,8 +21,9 @@ import java.security.Principal;
 @RequestMapping("user/panel/")
 @PreAuthorize("hasRole('USER')")
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final SearchService searchService;
+    private final PlaylistService playlistService;
 
 
     @GetMapping("search")
@@ -52,5 +54,11 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:update')")
     public PlaylistDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
         return userService.updatePlaylistName(principal, id, nameOfPlaylist);
+    }
+
+    @PatchMapping("update/playlistPrivation/{id}")
+    @PreAuthorize("hasAuthority('user:update')")
+    public PlaylistDto changePrivacyPlaylist(@PathVariable Long playlistId, boolean isPrivate) {
+        return playlistService.changePrivacyStatus(playlistId, isPrivate);
     }
 }

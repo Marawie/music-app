@@ -1,24 +1,33 @@
 package music.musicapp.service;
 
 import lombok.RequiredArgsConstructor;
-import music.musicapp.model.Music;
-import music.musicapp.model.user.User;
+import music.musicapp.dto.PlaylistDto;
+import music.musicapp.exception.ExceptionEnum;
+import music.musicapp.exception.RestException;
+import music.musicapp.model.Playlist;
 import music.musicapp.repository.PlaylistRepository;
 import music.musicapp.repository.UserRepository;
 import music.musicapp.service.interfaceService.PlaylistService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PlaylistServiceImpl implements PlaylistService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
+
+
     @Override
-    public Optional<User> checkUserPlaylistByMusicYouLiked(Music music) {
-        return Optional.empty();
+    public PlaylistDto changePrivacyStatus(Long playlistId, boolean isPrivate) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(
+                () -> new RestException(ExceptionEnum.PLAYLIST_NOT_FOUND));
+
+        playlist.setPrivate(isPrivate);
+        playlistRepository.save(playlist);
+
+        return modelMapper.map(playlist, PlaylistDto.class);
     }
-
-
 }

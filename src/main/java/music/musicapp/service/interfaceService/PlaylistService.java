@@ -1,10 +1,9 @@
 package music.musicapp.service.interfaceService;
 
-import music.musicapp.model.Music;
-import music.musicapp.model.user.User;
-
-import java.util.Optional;
+import music.musicapp.dto.PlaylistDto;
 
 public interface PlaylistService {
-    Optional<User> checkUserPlaylistByMusicYouLiked(Music music);
+
+    PlaylistDto changePrivacyStatus(Long playlistId, boolean isPrivate);
+
 }
