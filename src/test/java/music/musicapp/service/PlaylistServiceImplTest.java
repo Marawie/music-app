@@ -25,7 +25,7 @@ class PlaylistServiceImplTest {
         playlistService = new PlaylistServiceImpl(playlistRepository);
     }
     @Test
-    void changePrivacyStatus_ShouldUpdatePrivacyStatus() {
+    void changePrivacyStatusShouldUpdatePrivacyStatus() {
 
         // Given
         Long playlistId = 1L;
@@ -35,10 +35,10 @@ class PlaylistServiceImplTest {
         existingPlaylist.setId(playlistId);
         existingPlaylist.setPrivate(!isPrivate);
 
+        // When
         when(playlistRepository.findById(playlistId)).thenReturn(Optional.of(existingPlaylist));
         when(playlistRepository.save(any(Playlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
         PlaylistDto result = playlistService.changePrivacyStatus(playlistId, isPrivate);
 
         // Then
@@ -52,11 +52,13 @@ class PlaylistServiceImplTest {
     }
 
     @Test
-    void changePrivacyStatus_ShouldThrowExceptionIfPlaylistNotFound() {
+    void changePrivacyStatusShouldThrowExceptionIfPlaylistNotFound() {
+
         // Given
         Long playlistId = 1L;
         boolean isPrivate = true;
 
+        //When
         when(playlistRepository.findById(playlistId)).thenReturn(Optional.empty());
 
         //Then
