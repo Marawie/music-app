@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class PlaylistServiceImpl implements PlaylistService {
-    private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
 
 
