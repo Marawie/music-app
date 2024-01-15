@@ -6,7 +6,6 @@ import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.Music;
 import music.musicapp.model.Playlist;
-import music.musicapp.repository.MusicRepository;
 import music.musicapp.repository.PlaylistRepository;
 import music.musicapp.repository.UserRepository;
 import music.musicapp.service.interfaceService.MusicService;
@@ -20,10 +19,8 @@ import java.security.Principal;
 public class MusicServiceImpl implements MusicService {
     private final UserRepository userRepository;
     private final PlaylistRepository playlistRepository;
-    private final MusicRepository musicRepository;
 
 
-    //TODO: tej metodzie trzeba sie przyjerzec
     @Override
     public PlaylistDto addMusicToPlaylist(Principal principal, Music music, Long id) {
         final ModelMapper modelMapper = new ModelMapper();

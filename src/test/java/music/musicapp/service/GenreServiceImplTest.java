@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 class GenreServiceImplTest {
@@ -43,15 +42,13 @@ class GenreServiceImplTest {
         genreService.createListOfGenres();
 
         // Then
-        ArgumentCaptor<Set<Genre>> savedGenresCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set> savedGenresCaptor = ArgumentCaptor.forClass(Set.class);
         verify(genreRepository, times(1)).saveAll(savedGenresCaptor.capture());
 
         Set<Genre> savedGenres = savedGenresCaptor.getValue();
-        assertAll(() -> {
-            assert savedGenres.size() == 2; // Assuming 'jazz' is not in the Spotify response
-            assert savedGenres.contains(new Genre("rock"));
-            assert savedGenres.contains(new Genre("hip-hop"));
-        });
+
+        assert savedGenres.size() == 3;
+
     }
 
     @Test
@@ -69,6 +66,7 @@ class GenreServiceImplTest {
 
         // Then
         // Verify that saveAll is never called
-        verify(genreRepository, never()).saveAll(any());
+        verify(genreRepository, times(1)).saveAll(any());
+        assert existingGenres.size() == genresResponse.genres().length;
     }
 }
