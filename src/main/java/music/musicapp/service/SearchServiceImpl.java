@@ -23,12 +23,11 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public SearchResultDto searchEngine(String query) {
-        SearchResultDto searchResultDto = new SearchResultDto(
+        return new SearchResultDto(
                 musicRepository.findByTitleContaining(query),
                 podcastRepository.findByNameContaining(query),
                 genreRepository.findByNameContaining(query),
                 authorRepository.findByNameContaining(query)
         );
-        return searchResultDto;
     }
 }

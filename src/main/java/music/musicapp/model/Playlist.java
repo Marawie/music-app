@@ -14,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class Playlist {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +22,8 @@ public class Playlist {
     private String name;
 
     private boolean isPrivate;
+
+    //Do przemyslenia
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne

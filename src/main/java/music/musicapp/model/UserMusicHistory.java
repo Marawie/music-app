@@ -14,14 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserMusicHistory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany
     @JoinColumn(name = "history_music")
     private List<Music> musics = new ArrayList<>();
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToOne

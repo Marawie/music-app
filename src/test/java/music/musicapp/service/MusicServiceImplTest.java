@@ -29,7 +29,7 @@ class MusicServiceImplTest {
     }
 
     @Test
-    public void testAddMusicToPlaylist() {
+    void testAddMusicToPlaylist() {
         //Given
         Principal principal = mock(Principal.class);
         Music music = new Music();
@@ -53,7 +53,7 @@ class MusicServiceImplTest {
     }
 
     @Test
-    public void testAddMusicToPlaylistUserNotFound() {
+    void testAddMusicToPlaylistUserNotFound() {
         // Given
         Principal principal = mock(Principal.class);
         Music music = new Music();
@@ -71,7 +71,7 @@ class MusicServiceImplTest {
     }
 
     @Test
-    public void testAddMusicToPlaylistPlaylistNotFound() {
+    void testAddMusicToPlaylistPlaylistNotFound() {
         //Given
         Music music = new Music();
         Principal principal = mock(Principal.class);

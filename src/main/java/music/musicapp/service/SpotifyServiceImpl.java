@@ -38,6 +38,8 @@ public class SpotifyServiceImpl {
 
     private static String accessToken;
 
+    //Zrobić custom exceptions
+
     @Scheduled(fixedDelay = 60, timeUnit = TimeUnit.MINUTES)
     public void getAccessToken() {
 

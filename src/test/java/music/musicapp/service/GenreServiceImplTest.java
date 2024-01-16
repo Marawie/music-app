@@ -27,6 +27,7 @@ class GenreServiceImplTest {
         genreService = new GenreServiceImpl(genreRepository, spotifyService);
     }
 
+    //Poprawić zwrotke oryginalonej metody
     @Test
     void createListOfGenresShouldUpdateGenres() {
         // Given

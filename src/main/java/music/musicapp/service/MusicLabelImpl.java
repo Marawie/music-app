@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,9 +26,10 @@ public class MusicLabelImpl implements MusicLabel {
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("mp3", "wav", "flac");
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("audio/mpeg", "audio/wav", "audio/flac");
-    private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 20 * 1024 * 1024L;
     private final MusicRepository musicRepository;
 
+    //Zrobić getMusic i dodać ją do historii za pomocą Principal
     @Override
     public Resource downloadMusic(Long id) {
         byte[] audio = musicRepository.findById(id).orElseThrow(
