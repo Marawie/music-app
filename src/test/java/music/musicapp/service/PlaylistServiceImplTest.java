@@ -4,6 +4,7 @@ import music.musicapp.dto.PlaylistDto;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.Playlist;
 import music.musicapp.repository.PlaylistRepository;
+import music.musicapp.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,12 +19,16 @@ class PlaylistServiceImplTest {
 
     private PlaylistRepository playlistRepository;
     private PlaylistServiceImpl playlistService;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
+
         playlistRepository = mock(PlaylistRepository.class);
-        playlistService = new PlaylistServiceImpl(playlistRepository);
+        userRepository = mock(UserRepository.class);
+        playlistService = new PlaylistServiceImpl(playlistRepository, userRepository);
     }
+
     @Test
     void changePrivacyStatusShouldUpdatePrivacyStatus() {
 
@@ -53,7 +58,6 @@ class PlaylistServiceImplTest {
 
     @Test
     void changePrivacyStatusShouldThrowExceptionIfPlaylistNotFound() {
-
         // Given
         Long playlistId = 1L;
         boolean isPrivate = true;

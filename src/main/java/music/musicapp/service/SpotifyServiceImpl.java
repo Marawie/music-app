@@ -16,7 +16,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class SpotifyServiceImpl {
 
     //Zrobić custom exceptions
 
-    @Scheduled(fixedDelay = 60, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 3600000)
     public void getAccessToken() {
 
         final HttpRequest request = HttpRequest
