@@ -37,8 +37,6 @@ public class SpotifyServiceImpl {
 
     private static String accessToken;
 
-    //Zrobić custom exceptions
-
     @Scheduled(fixedDelay = 3600000)
     public void getAccessToken() {
 
@@ -51,11 +49,13 @@ public class SpotifyServiceImpl {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             String[] responseOfApi = response.body().split(",");
-            String access = Arrays.stream(responseOfApi).findFirst().orElseThrow(() -> new RestException(ExceptionEnum.SPOTIFY_AUTHORIZATION_EXCEPTION));
+            String access = Arrays.stream(responseOfApi).findFirst().orElseThrow(
+                    () -> new RestException(ExceptionEnum.SPOTIFY_AUTHORIZATION_EXCEPTION));
             accessToken = access.substring(17, access.length() - 1);
-        } catch (IOException | InterruptedException e) {
+        }
+        catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get access token");
-            throw new RuntimeException(e);
+            throw new RestException(ExceptionEnum.SPOTIFY_AUTHORIZATION_EXCEPTION);
         }
     }
 
@@ -67,7 +67,7 @@ public class SpotifyServiceImpl {
 
         } catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get artist");
-            throw new RuntimeException(e);
+            throw new RestException(ExceptionEnum.ARTIST_NOT_FOUND);
         }
     }
 
@@ -81,7 +81,7 @@ public class SpotifyServiceImpl {
             return objectMapper.readValue(responseBody, GenresResponse.class);
         } catch (IOException | InterruptedException e) {
             log.error("Error sending http request to spotify to get genres");
-            throw new RuntimeException(e);
+            throw new RestException(ExceptionEnum.GENRES_NOT_FOUND);
         }
     }
 

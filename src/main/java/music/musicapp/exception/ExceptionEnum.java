@@ -17,7 +17,8 @@ public enum ExceptionEnum {
     WRONG_MIME_TYPES(HttpStatus.BAD_REQUEST, "These types are allowed: audio/mpeg, audio/wav, audio/flac"),
     FILE_TOO_BIG(HttpStatus.BAD_REQUEST, "Your file is too big, we only accepted 25mb by one file"),
     FILE_READ_ERROR(HttpStatus.CONFLICT, "Error while trying to read file"),
-    PLAYLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "Repository doesn't exist")
+    ARTIST_NOT_FOUND(HttpStatus.NOT_FOUND, "This artist doesn't match with any Artist"),
+    GENRES_NOT_FOUND(HttpStatus.NOT_FOUND, "This genre doesn't match with any genres"),
     ;
     private final HttpStatus httpStatus;
     private final String message;
