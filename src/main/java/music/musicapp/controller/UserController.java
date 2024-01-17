@@ -2,10 +2,7 @@ package music.musicapp.controller;
 
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
-import music.musicapp.dto.PlaylistDto;
 import music.musicapp.dto.SearchResultDto;
-import music.musicapp.dto.UserDto;
-import music.musicapp.model.Playlist;
 import music.musicapp.service.interfaceService.PlaylistService;
 import music.musicapp.service.interfaceService.SearchService;
 import music.musicapp.service.interfaceService.UserService;
@@ -38,27 +35,4 @@ public class UserController {
         userService.changePassword(request, principal);
     }
 
-    @PostMapping("create/new/playlist")
-    @PreAuthorize("hasAuthority('user:create')")
-    public UserDto addPlaylist(@RequestParam Playlist playlist, Principal principal) {
-        return userService.addPlaylist(principal, playlist);
-    }
-
-    @DeleteMapping("remove/playlist/{id}")
-    @PreAuthorize("hasAuthority('user:delete')")
-    public UserDto removePlaylist(@PathVariable Long id, Principal principal) {
-        return userService.removePlaylist(principal, id);
-    }
-
-    @PutMapping("update/playlist/{id}")
-    @PreAuthorize("hasAuthority('user:update')")
-    public PlaylistDto editPlaylist(@PathVariable Long id, Principal principal, @RequestParam String nameOfPlaylist) {
-        return userService.updatePlaylistName(principal, id, nameOfPlaylist);
-    }
-
-    @PatchMapping("update/playlistPrivation/{id}")
-    @PreAuthorize("hasAuthority('user:update')")
-    public PlaylistDto changePrivacyPlaylist(@PathVariable Long playlistId, boolean isPrivate) {
-        return playlistService.changePrivacyStatus(playlistId, isPrivate);
-    }
 }
