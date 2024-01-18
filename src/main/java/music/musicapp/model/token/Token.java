@@ -1,12 +1,10 @@
 package music.musicapp.model.token;
 
 
+import lombok.*;
+import music.musicapp.model.user.Confirmation;
 import music.musicapp.model.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -31,4 +29,10 @@ public class Token {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     public User user;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private Confirmation confirmation;
 }

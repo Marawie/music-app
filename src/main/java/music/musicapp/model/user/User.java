@@ -73,6 +73,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Friendship> friends = new HashSet<>();
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private Confirmation confirmation;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
