@@ -1,5 +1,7 @@
 package music.musicapp.service.interfaceService;
 
+import music.musicapp.model.user.User;
+
 public interface EmailService {
-void sendMessageToUser(String name, String to, String token);
+void sendMessageToUser(User user);
 }
