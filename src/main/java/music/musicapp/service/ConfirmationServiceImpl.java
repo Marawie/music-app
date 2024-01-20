@@ -64,6 +64,29 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
     }
 
+    @Override
+    public ConfirmationDto UserEmailExpired(Long id, RegisterEmailResponse response) {
+        final ModelMapper modelMapper = new ModelMapper();
+
+
+
+        final User user = userRepository.findById(id).orElseThrow(
+                () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
+
+        if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
+
+            user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_EXPIRED);
+            userRepository.delete(user);
+            confirmationRepository.save(user.getConfirmation());
+            sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
+        }
+
+        return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
+    }
+
+
     private void sendConfirmationEmail(String to, String subject, User user) {
         final String confirmationLink = host + "/confirm?token=" + authenticationService.generateTokenToEmail(user);
         SimpleMailMessage message = new SimpleMailMessage();
