@@ -139,9 +139,9 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public String generateTokenToEmail(Long userId) {
+    public String generateTokenToEmail(User user) {
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) //tydzien wanzy
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
