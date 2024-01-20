@@ -16,9 +16,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     private String host;
 
     @Override
-    public ConfirmationDto UserEmailAccepted(Long id, RegisterEmailResponse response) {
+    public ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response) {
         final ModelMapper modelMapper = new ModelMapper();
 
         final User user = userRepository.findById(id).orElseThrow(
@@ -48,42 +50,28 @@ public class ConfirmationServiceImpl implements ConfirmationService {
             user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted", user);
-
-        } else if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
-
-            user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_EXPIRED);
-            userRepository.delete(user);
-            confirmationRepository.save(user.getConfirmation());
-            sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
-
-        } else
-
+        } else {
             user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED);
-        confirmationRepository.save(user.getConfirmation());
-        sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted", user);
+            confirmationRepository.save(user.getConfirmation());
+            sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted", user);
+        }
         return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
     }
 
-    @Override
-    public ConfirmationDto UserEmailExpired(Long id, RegisterEmailResponse response) {
-        final ModelMapper modelMapper = new ModelMapper();
+    @Scheduled(cron = "0 0 1 * * ?") // 1am
+    public void userEmailExpired() {
+        List<User> unacceptedUsers = userRepository.findByConfirmation_ConfirmationStateUsers(
+                ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED);
 
-
-
-        final User user = userRepository.findById(id).orElseThrow(
-                () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
-
-        if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
-
-            user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_EXPIRED);
-            userRepository.delete(user);
-            confirmationRepository.save(user.getConfirmation());
-            sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
+        for (User user : unacceptedUsers) {
+            LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
+            if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
+                user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_EXPIRED);
+                userRepository.delete(user);
+                confirmationRepository.save(user.getConfirmation());
+                sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
+            }
         }
-
-        return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
     }
 
 

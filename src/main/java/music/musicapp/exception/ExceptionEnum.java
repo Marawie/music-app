@@ -19,6 +19,7 @@ public enum ExceptionEnum {
     FILE_READ_ERROR(HttpStatus.CONFLICT, "Error while trying to read file"),
     ARTIST_NOT_FOUND(HttpStatus.NOT_FOUND, "This artist doesn't match with any Artist"),
     GENRES_NOT_FOUND(HttpStatus.NOT_FOUND, "This genre doesn't match with any genres"),
+    PLAYLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "Playlist not found!")
     ;
     private final HttpStatus httpStatus;
     private final String message;

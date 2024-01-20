@@ -17,6 +17,6 @@ public class ConfirmationController {
 
     @PutMapping("/confirmations/{userId}")
     public ConfirmationDto UserEmailAccepted(@RequestBody RegisterEmailResponse response, @PathVariable Long UserId){
-        return confirmationService.UserEmailAccepted(UserId, response);
+        return confirmationService.userEmailAccepted(UserId, response);
     }
 }

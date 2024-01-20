@@ -5,7 +5,7 @@ import music.musicapp.dto.RegisterEmailResponse;
 
 public interface ConfirmationService {
 
-    ConfirmationDto UserEmailExpired(Long id, RegisterEmailResponse response);
+    void userEmailExpired();
 
-    ConfirmationDto UserEmailAccepted(Long id, RegisterEmailResponse response);
+    ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response);
 }
