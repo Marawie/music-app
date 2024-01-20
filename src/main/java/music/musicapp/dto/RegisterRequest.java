@@ -1,12 +1,12 @@
 package music.musicapp.dto;
 
 
-import music.musicapp.model.user.Role;
-import music.musicapp.model.user.Sex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import music.musicapp.model.user.Role;
+import music.musicapp.model.user.Sex;
 
 @Data
 @Builder

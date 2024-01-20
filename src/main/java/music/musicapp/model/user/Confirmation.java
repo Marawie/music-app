@@ -5,12 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import music.musicapp.model.token.Token;
-
 import java.time.LocalDateTime;
 
-@Data
+import static music.musicapp.model.user.ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED;
 
+@Data
 @Entity
 @Table(name = "Confirmation", schema = "music")
 @NoArgsConstructor
@@ -23,19 +22,16 @@ public class Confirmation {
 
     private LocalDateTime localDateTime;
     private ConfirmationState confirmationState;
-
-    @OneToOne(targetEntity = Token.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "token_id")
-    private Token token;
+    private String token;
 
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
-    public Confirmation(Token token, User user, ConfirmationState confirmationState) {
+    public Confirmation(String token, User user) {
         this.localDateTime = LocalDateTime.now();
         this.token = token;
         this.user = user;
-        this.confirmationState = confirmationState;
+        this.confirmationState = EMAIL_VERIFICATION_NOT_ACCEPTED;
     }
 }
