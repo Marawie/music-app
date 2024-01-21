@@ -42,8 +42,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     public ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response) {
 
         final ModelMapper modelMapper = new ModelMapper();
+
         final User user = userRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
         final LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
         final String generateTokenToEmail = authenticationService.generateTokenToEmail(user);
 
@@ -56,12 +58,12 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
             user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
-            sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted", user);
+            sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted");
         } else {
 
             user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_NOT_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
-            sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted", user);
+            sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted");
         }
 
         return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
@@ -78,21 +80,26 @@ public class ConfirmationServiceImpl implements ConfirmationService {
                 user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_EXPIRED);
                 userRepository.delete(user);
                 confirmationRepository.save(user.getConfirmation());
-                sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
+                sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!");
             }
         }
     }
 
 
-    private void sendConfirmationEmail(String to, String subject, User user) {
+    private void sendConfirmationEmail(String to, String subject) {
 
-        final String tokenToEmail = authenticationService.generateTokenToEmail(user);
-        final String confirmationLink = host + "/confirm?token=" + tokenToEmail;
+        final User user = userRepository.findByEmail(to)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
         final SimpleMailMessage message = new SimpleMailMessage();
+        final String token = user.getConfirmation().getToken();
+        final String confirmationLink = host + "/confirm?token=" + token;
 
         message.setTo(to);
         message.setFrom(fromEmail);
         message.setSubject(subject);
+        message.setText("The message was generated for a user with the nickname" + user.getUsername());
+        message.setText("If this happens otherwise, please report it to our support");
         message.setText("Click the link below to confirm your registration:\n" + confirmationLink);
         message.setText("The message with the link is only valid for 7 days, after which your account will expire");
 

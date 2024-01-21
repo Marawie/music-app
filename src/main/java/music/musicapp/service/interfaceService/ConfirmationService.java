@@ -8,4 +8,6 @@ public interface ConfirmationService {
     void userEmailExpired();
 
     ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response);
+
+
 }
