@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.AuthenticationRequest;
 import music.musicapp.dto.AuthenticationResponse;
 import music.musicapp.dto.RegisterRequest;
+import music.musicapp.exception.ExceptionEnum;
+import music.musicapp.exception.RestException;
 import music.musicapp.model.token.Token;
 import music.musicapp.model.token.TokenType;
 import music.musicapp.model.user.ConfirmationState;
@@ -72,14 +74,20 @@ public class AuthenticationService {
         );
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
-        String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+        if (user.getConfirmation().getConfirmationState() == ConfirmationState.EMAIL_VERIFICATION_ACCEPTED){
+
+            String jwtToken = jwtService.generateToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, jwtToken);
+
+            return AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        }
+
+        else throw new RestException(ExceptionEnum.USER_CONFIRMATION_STATE_IS_NOT_ACCEPTED);
     }
 
     public void refreshToken(
@@ -147,5 +155,4 @@ public class AuthenticationService {
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
-
 }

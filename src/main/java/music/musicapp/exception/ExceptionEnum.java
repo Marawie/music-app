@@ -19,7 +19,8 @@ public enum ExceptionEnum {
     FILE_READ_ERROR(HttpStatus.CONFLICT, "Error while trying to read file"),
     ARTIST_NOT_FOUND(HttpStatus.NOT_FOUND, "This artist doesn't match with any Artist"),
     GENRES_NOT_FOUND(HttpStatus.NOT_FOUND, "This genre doesn't match with any genres"),
-    PLAYLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "Playlist not found!")
+    PLAYLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "Playlist not found!"),
+    USER_CONFIRMATION_STATE_IS_NOT_ACCEPTED(HttpStatus.FORBIDDEN , "You have to click link which is generated in your email. You have only 7 days to do it, or account would be deleted")
     ;
     private final HttpStatus httpStatus;
     private final String message;

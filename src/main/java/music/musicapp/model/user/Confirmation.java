@@ -1,13 +1,9 @@
 package music.musicapp.model.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.*;
 
-import static music.musicapp.model.user.ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -21,17 +17,22 @@ public class Confirmation {
     Long id;
 
     private LocalDateTime localDateTime;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "confirmation_state")
     private ConfirmationState confirmationState;
     private String token;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_id")
-    private User user;
-
-    public Confirmation(String token, User user) {
-        this.localDateTime = LocalDateTime.now();
+    public Confirmation(LocalDateTime localDateTime, ConfirmationState confirmationState, String token, User user) {
+        this.localDateTime = localDateTime;
+        this.confirmationState = confirmationState;
         this.token = token;
         this.user = user;
-        this.confirmationState = EMAIL_VERIFICATION_NOT_ACCEPTED;
     }
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, name = "user_confirmation")
+    private User user;
+
 }

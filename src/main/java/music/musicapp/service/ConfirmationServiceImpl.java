@@ -7,7 +7,7 @@ import music.musicapp.dto.ConfirmationDto;
 import music.musicapp.dto.RegisterEmailResponse;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
-import music.musicapp.model.user.ConfirmationState;
+import music.musicapp.model.user.Confirmation;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.ConfirmationRepository;
 import music.musicapp.repository.UserRepository;
@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static music.musicapp.model.user.ConfirmationState.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,35 +40,42 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     @Override
     public ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response) {
-        final ModelMapper modelMapper = new ModelMapper();
 
+        final ModelMapper modelMapper = new ModelMapper();
         final User user = userRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        final LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
+        final String generateTokenToEmail = authenticationService.generateTokenToEmail(user);
 
-        LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
+        confirmationRepository.save(
+                new Confirmation
+                        (localDateTime, EMAIL_VERIFICATION_NOT_ACCEPTED, generateTokenToEmail, user)
+        );
 
         if (response.isIsClicked()) {
 
-            user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_ACCEPTED);
+            user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted", user);
         } else {
-            user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED);
+
+            user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_NOT_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted", user);
         }
+
         return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     public void userEmailExpired() {
-        List<User> unacceptedUsers = userRepository.findByConfirmation_ConfirmationStateUsers(
-                ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED);
+        List<User> unacceptedUsers = userRepository.findByConfirmation_ConfirmationState(
+                EMAIL_VERIFICATION_NOT_ACCEPTED);
 
         for (User user : unacceptedUsers) {
             LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
             if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
-                user.getConfirmation().setConfirmationState(ConfirmationState.EMAIL_VERIFICATION_EXPIRED);
+                user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_EXPIRED);
                 userRepository.delete(user);
                 confirmationRepository.save(user.getConfirmation());
                 sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!", user);
@@ -76,8 +85,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
 
     private void sendConfirmationEmail(String to, String subject, User user) {
-        final String confirmationLink = host + "/confirm?token=" + authenticationService.generateTokenToEmail(user);
-        SimpleMailMessage message = new SimpleMailMessage();
+
+        final String tokenToEmail = authenticationService.generateTokenToEmail(user);
+        final String confirmationLink = host + "/confirm?token=" + tokenToEmail;
+        final SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(to);
         message.setFrom(fromEmail);
