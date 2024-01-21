@@ -5,7 +5,6 @@ import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.auth.AuthenticationService;
 import music.musicapp.dto.ConfirmationDto;
-import music.musicapp.dto.RegisterEmailResponse;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.user.Confirmation;
@@ -20,7 +19,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import static music.musicapp.model.user.ConfirmationState.*;
@@ -42,7 +43,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     private String jwtSecret;
 
     @Override
-    public ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response) {
+    public ConfirmationDto userEmailAccepted(Long id) {
 
         final ModelMapper modelMapper = new ModelMapper();
 
@@ -73,13 +74,12 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     @Override
     public boolean handleConfirmationClick(String token) {
-        if ((!isValidToken(token)) && isValidToken(token)) {
-            confirmationRepository.saveTokenConfirmation(token);
+        if ((!isValidToken(token))) {
+            confirmationRepository.saveByConfirmationToken(token);
             return true;
         }
         return false;
     }
-
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     public void userEmailExpired() {
@@ -96,7 +96,6 @@ public class ConfirmationServiceImpl implements ConfirmationService {
             }
         }
     }
-
 
     private void sendConfirmationEmail(String to, String subject) {
 
@@ -124,11 +123,8 @@ public class ConfirmationServiceImpl implements ConfirmationService {
                     .setSigningKey(jwtSecret)
                     .parseClaimsJws(token)
                     .getBody();
-
-            if (!claims.isEmpty()) {
-                return true;
-            }
-            return false;
+            Date expirationDate = claims.getExpiration();
+            return !claims.isEmpty() && (!expirationDate.after(Date.from(Instant.now())));
 
         } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException e) {
             throw new RestException(ExceptionEnum.USER_NOT_FOUND);
