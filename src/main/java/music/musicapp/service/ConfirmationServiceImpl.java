@@ -1,6 +1,7 @@
 package music.musicapp.service;
 
 
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.auth.AuthenticationService;
 import music.musicapp.dto.ConfirmationDto;
@@ -37,6 +38,8 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     private String fromEmail;
     @Value("${spring.mail.host}")
     private String host;
+    @Value("${application.security.jwt.secret-key}")
+    private String jwtSecret;
 
     @Override
     public ConfirmationDto userEmailAccepted(Long id, RegisterEmailResponse response) {
@@ -47,15 +50,14 @@ public class ConfirmationServiceImpl implements ConfirmationService {
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
-        final String generateTokenToEmail = authenticationService.generateTokenToEmail(user);
+        final String token = authenticationService.generateTokenToEmail(user);
 
         confirmationRepository.save(
                 new Confirmation
-                        (localDateTime, EMAIL_VERIFICATION_NOT_ACCEPTED, generateTokenToEmail, user)
+                        (localDateTime, EMAIL_VERIFICATION_NOT_ACCEPTED, token, user) // tu tez sie przyjrzec czy nie powstanie nowy obiekt confirmation ktory jest przypisany 2 raz do tego samego uzytkowniak
         );
 
-        if (response.isIsClicked()) {
-
+        if (handleConfirmationClick(token)) {
             user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted");
@@ -68,6 +70,16 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
         return modelMapper.map(user.getConfirmation(), ConfirmationDto.class);
     }
+
+    @Override
+    public boolean handleConfirmationClick(String token) {
+        if ((!isValidToken(token)) && isValidToken(token)) {
+            confirmationRepository.saveTokenConfirmation(token);
+            return true;
+        }
+        return false;
+    }
+
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     public void userEmailExpired() {
@@ -88,7 +100,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     private void sendConfirmationEmail(String to, String subject) {
 
-        final User user = userRepository.findByEmail(to)
+        final User user = userRepository.findByEmail(to) // przyjerzec się temu czy to zadziała zgodnie z oczekiwaniami
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final SimpleMailMessage message = new SimpleMailMessage();
@@ -104,5 +116,22 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         message.setText("The message with the link is only valid for 7 days, after which your account will expire");
 
         javaMailSender.send(message);
+    }
+
+    private boolean isValidToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            if (!claims.isEmpty()) {
+                return true;
+            }
+            return false;
+
+        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException e) {
+            throw new RestException(ExceptionEnum.USER_NOT_FOUND);
+        }
     }
 }
