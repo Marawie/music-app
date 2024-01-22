@@ -22,17 +22,16 @@ public class Confirmation {
     private ConfirmationState confirmationState;
     private String token;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "user_confirmation")
+    private User user;
+
     public Confirmation(LocalDateTime localDateTime, ConfirmationState confirmationState, String token, User user) {
         this.localDateTime = localDateTime;
         this.confirmationState = confirmationState;
         this.token = token;
         this.user = user;
     }
-
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_confirmation")
-    private User user;
-
 }
