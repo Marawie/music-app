@@ -14,8 +14,10 @@ import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.token.Token;
 import music.musicapp.model.token.TokenType;
+import music.musicapp.model.user.Confirmation;
 import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.User;
+import music.musicapp.repository.ConfirmationRepository;
 import music.musicapp.repository.TokenRepository;
 import music.musicapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -37,12 +40,12 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final ConfirmationRepository confirmationRepository;
 
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        final ConfirmationState emailVerificationNotAccepted = ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED;
 
         User user = User.builder()
                 .username(request.getUsername())
@@ -54,8 +57,15 @@ public class AuthenticationService {
                 .sex(request.getSex())
                 .build();
 
-        user.getConfirmation().setConfirmationState(emailVerificationNotAccepted);
+        var confirmation = Confirmation.builder()
+                .id(null)
+                .token(generateTokenToEmail(user))
+                .localDateTime(LocalDateTime.now())
+                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
+                .user(user).build();
+
         User savedUser = repository.save(user);
+        confirmationRepository.save(confirmation);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
@@ -152,7 +162,7 @@ public class AuthenticationService {
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) //tydzien wanzy
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
 }

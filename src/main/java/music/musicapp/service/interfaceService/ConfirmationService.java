@@ -1,9 +1,7 @@
 package music.musicapp.service.interfaceService;
 
-import music.musicapp.dto.ConfirmationDto;
-
 public interface ConfirmationService {
-    void userEmailExpired();
-    ConfirmationDto userEmailAccepted(Long id);
+    void userLinkExpired();
+    boolean userEmailAccepted(Long id, String token);
     boolean handleConfirmationClick(String token);
 }
