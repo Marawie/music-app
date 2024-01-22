@@ -11,21 +11,25 @@ import java.util.Properties;
 @Configuration
 public class MailConfiguration {
 
-    @Value("application.spring.host")
-    String host;
-    @Value("application.spring.port")
-    Integer port;
-    @Value("application.spring.username")
-    String username;
-    @Value("application.spring.password")
-    String password;
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Value("${spring.mail.port}")
+    private String port;
+
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Value("${spring.mail.password}")
+    private String password;
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
-        mailSender.setPort(port);
+        mailSender.setPort(Integer.parseInt(port));
         mailSender.setUsername(username);
         mailSender.setPassword(password);
+        mailSender.setDefaultEncoding("UTF-8");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
