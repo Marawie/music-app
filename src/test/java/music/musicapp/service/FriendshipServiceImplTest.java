@@ -78,4 +78,51 @@ class FriendshipServiceImplTest {
         Assertions.assertEquals(FriendshipRequestState.ACCEPTED, friendship.getFriendshipRequestState());
         Assertions.assertEquals(friendUser.getId(), result.getId());
     }
+
+    @Test
+    void testRejectFriendshipRequest() {
+        // Given
+        Principal principal = mock(Principal.class);
+        Long friendId = 1L;
+        User loggedUser = new User();
+        User friendUser = new User();
+        Friendship friendship = new Friendship(loggedUser, friendUser, FriendshipRequestState.WAITING_FOR_RESPONSE);
+
+        // When
+        when(principal.getName()).thenReturn("user@example.com");
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(loggedUser));
+        when(userRepository.findById(friendId)).thenReturn(Optional.of(friendUser));
+        when(friendshipRepository.findByUserAndUserFriends(loggedUser, friendUser)).thenReturn(friendship);
+        when(friendshipRepository.findByUserFriendsAndUser(friendUser, loggedUser)).thenReturn(friendship);
+
+        UserDto result = friendshipService.rejectFriendshipRequest(principal, friendId);
+
+        // Then
+       // Assertions.assertEquals(FriendshipRequestState.REJECTED_BY_YOU, friendship.getFriendshipRequestState());
+        Assertions.assertEquals(FriendshipRequestState.REJECTED_BY_USER, friendship.getFriendshipRequestState());
+        Assertions.assertEquals(friendUser.getId(), result.getId());
+    }
+    @Test
+    void testWithdrawnRequestByUser() {
+        // Given
+        Principal principal = mock(Principal.class);
+        Long friendId = 1L;
+        User loggedUser = new User();
+        User friendUser = new User();
+        Friendship friendship = new Friendship(loggedUser, friendUser, FriendshipRequestState.WAITING_FOR_RESPONSE);
+
+        // When
+        when(principal.getName()).thenReturn("user@example.com");
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(loggedUser));
+        when(userRepository.findById(friendId)).thenReturn(Optional.of(friendUser));
+        when(friendshipRepository.findByUserAndUserFriends(loggedUser, friendUser)).thenReturn(friendship);
+        when(friendshipRepository.findByUserFriendsAndUser(friendUser, loggedUser)).thenReturn(friendship);
+
+        UserDto result = friendshipService.withdrawnRequestByUser(principal, friendId);
+
+        // Then
+        Assertions.assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
+        Assertions.assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
+        Assertions.assertEquals(friendUser.getId(), result.getId());
+    }
 }
