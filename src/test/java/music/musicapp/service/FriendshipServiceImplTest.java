@@ -1,6 +1,7 @@
 package music.musicapp.service;
 
 import music.musicapp.dto.FriendshipDto;
+import music.musicapp.dto.UserDto;
 import music.musicapp.model.user.Friendship;
 import music.musicapp.model.user.FriendshipRequestState;
 import music.musicapp.model.user.User;
@@ -14,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,5 +54,28 @@ class FriendshipServiceImplTest {
                         new Friendship(friendUser, loggedUser, FriendshipRequestState.ACCEPTATION_REQUIRED)
                 )
         );
+    }
+
+    @Test
+    void testAcceptFriendshipRequest() {
+        // Given
+        Principal principal = mock(Principal.class);
+        Long friendId = 1L;
+        User loggedUser = new User();
+        User friendUser = new User();
+        Friendship friendship = new Friendship(loggedUser, friendUser, FriendshipRequestState.WAITING_FOR_RESPONSE);
+
+        // When
+        when(principal.getName()).thenReturn("user@example.com");
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(loggedUser));
+        when(userRepository.findById(friendId)).thenReturn(Optional.of(friendUser));
+        when(friendshipRepository.findByUserAndUserFriends(loggedUser, friendUser)).thenReturn(friendship);
+        when(friendshipRepository.findByUserFriendsAndUser(friendUser, loggedUser)).thenReturn(friendship);
+
+        UserDto result = friendshipService.acceptFriendshipRequest(principal, friendId);
+
+        // Then
+        Assertions.assertEquals(FriendshipRequestState.ACCEPTED, friendship.getFriendshipRequestState());
+        Assertions.assertEquals(friendUser.getId(), result.getId());
     }
 }
