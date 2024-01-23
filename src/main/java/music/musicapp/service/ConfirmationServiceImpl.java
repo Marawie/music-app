@@ -15,6 +15,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     private String host;
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
-
+    @Transactional
     @Override
     public boolean userEmailAccepted(Long id, String token) {
 
@@ -49,7 +50,6 @@ public class ConfirmationServiceImpl implements ConfirmationService {
             return true;
 
         } else {
-            user.getConfirmation().setConfirmationState(EMAIL_VERIFICATION_NOT_ACCEPTED);
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted");
             return false;
@@ -60,17 +60,21 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     public boolean handleConfirmationClick(String token) {
 
         Confirmation confirmation = confirmationRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.CONFIRMATION_IS_NOT_FOUND));
+
+        User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
-        User user = confirmation.getUser();
-        if (user != null && !user.getConfirmation().getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
+
+        if (user != null && user.getConfirmation() != null && !user.getConfirmation().getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
             confirmation.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
-            confirmationRepository.save(confirmation);
-            return true;
-        } else
+        }
+        else{
             confirmation.setConfirmationState(EMAIL_VERIFICATION_NOT_ACCEPTED);
+            return false;
+        }
         confirmationRepository.save(confirmation);
-        return false;
+        return true;
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am

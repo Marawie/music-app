@@ -24,7 +24,7 @@ public class Confirmation {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "confirmation")
     @JoinColumn(nullable = false, name = "user_confirmation")
     private User user;
 
