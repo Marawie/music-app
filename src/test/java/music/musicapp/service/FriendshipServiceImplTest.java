@@ -7,16 +7,19 @@ import music.musicapp.model.user.FriendshipRequestState;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.FriendshipRepository;
 import music.musicapp.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +50,7 @@ class FriendshipServiceImplTest {
         //Then
         FriendshipDto result = friendshipService.addUserToFriend(principal, friendId);
 
-        Assertions.assertEquals(FriendshipRequestState.WAITING_FOR_RESPONSE, result.getState());
+        assertEquals(FriendshipRequestState.WAITING_FOR_RESPONSE, result.getState());
         verify(friendshipRepository, times(1)).saveAll(
                 List.of(
                         new Friendship(loggedUser, friendUser, FriendshipRequestState.WAITING_FOR_RESPONSE),
@@ -75,8 +78,8 @@ class FriendshipServiceImplTest {
         UserDto result = friendshipService.acceptFriendshipRequest(principal, friendId);
 
         // Then
-        Assertions.assertEquals(FriendshipRequestState.ACCEPTED, friendship.getFriendshipRequestState());
-        Assertions.assertEquals(friendUser.getId(), result.getId());
+        assertEquals(FriendshipRequestState.ACCEPTED, friendship.getFriendshipRequestState());
+        assertEquals(friendUser.getId(), result.getId());
     }
 
     @Test
@@ -98,10 +101,11 @@ class FriendshipServiceImplTest {
         UserDto result = friendshipService.rejectFriendshipRequest(principal, friendId);
 
         // Then
-       // Assertions.assertEquals(FriendshipRequestState.REJECTED_BY_YOU, friendship.getFriendshipRequestState());
-        Assertions.assertEquals(FriendshipRequestState.REJECTED_BY_USER, friendship.getFriendshipRequestState());
-        Assertions.assertEquals(friendUser.getId(), result.getId());
+        // Assertions.assertEquals(FriendshipRequestState.REJECTED_BY_YOU, friendship.getFriendshipRequestState());
+        assertEquals(FriendshipRequestState.REJECTED_BY_USER, friendship.getFriendshipRequestState());
+        assertEquals(friendUser.getId(), result.getId());
     }
+
     @Test
     void testWithdrawnRequestByUser() {
         // Given
@@ -121,8 +125,39 @@ class FriendshipServiceImplTest {
         UserDto result = friendshipService.withdrawnRequestByUser(principal, friendId);
 
         // Then
-        Assertions.assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
-        Assertions.assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
-        Assertions.assertEquals(friendUser.getId(), result.getId());
+        assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
+        assertEquals(FriendshipRequestState.WITHDRAWN, friendship.getFriendshipRequestState());
+        assertEquals(friendUser.getId(), result.getId());
+    }
+
+
+    @Test
+    void testGetAllFriendship() {
+        // Given
+        Principal principal = mock(Principal.class);
+        User loggedUser = new User();
+        User friendUser1 = new User();
+        User friendUser2 = new User();
+        loggedUser.setId(1L);
+        friendUser1.setId(2L);
+        friendUser2.setId(3L);
+
+        Set<Friendship> friendships = new HashSet<>();
+        friendships.add(new Friendship(loggedUser, friendUser1, FriendshipRequestState.ACCEPTED));
+        friendships.add(new Friendship(loggedUser, friendUser2, FriendshipRequestState.ACCEPTED));
+
+        loggedUser.setFriends(friendships);
+
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(loggedUser));
+
+        when(friendshipRepository.findAllByUserAndFriendshipRequestState(loggedUser, FriendshipRequestState.ACCEPTED))
+                .thenReturn(friendships);
+
+        // When
+        when(principal.getName()).thenReturn("user@example.com");
+        Set<UserDto> result = friendshipService.getAllFriendship(principal);
+
+        // Then
+        assertEquals(2, result);
     }
 }

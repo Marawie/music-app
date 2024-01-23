@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,15 +106,12 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public Set<UserDto> getAllFriendship(Principal principal) {
         final ModelMapper modelMapper = new ModelMapper();
-
         final User loggedUser = getUser(principal);
-        final Set<Friendship> friends = loggedUser.getFriends();
+        final Set<Friendship> friends = friendshipRepository.findAllByUserAndFriendshipRequestState(loggedUser, FriendshipRequestState.ACCEPTED);
 
-        final Set<User> users = friends.stream()
-                .map(Friendship::getFriend)
+        return friends.stream()
+                .map(friendship -> modelMapper.map(friendship.getFriend(), UserDto.class))
                 .collect(Collectors.toSet());
-
-        return Collections.singleton(modelMapper.map(users, UserDto.class));
     }
 
     private User getUser(Principal principal) {
