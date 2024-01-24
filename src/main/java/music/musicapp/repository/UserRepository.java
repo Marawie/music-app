@@ -4,6 +4,7 @@ import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,6 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     List<User> findByConfirmation_ConfirmationState(ConfirmationState confirmationState);
 
-    @Query("SELECT u FROM User u WHERE u.confirmation.token = :confirmationToken")
-    Optional<User> findByConfirmationToken(String confirmationToken);
+    @Query("SELECT u FROM User u JOIN u.confirmation c WHERE c.token = :confirmationToken")
+    Optional<User> findByConfirmationToken(@Param("confirmationToken") String confirmationToken);
 }

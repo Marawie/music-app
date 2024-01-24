@@ -75,8 +75,7 @@ public class User implements UserDetails {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_confirmation")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Confirmation confirmation;
 
     @Override

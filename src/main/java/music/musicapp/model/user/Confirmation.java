@@ -20,12 +20,13 @@ public class Confirmation {
     @Enumerated(EnumType.STRING)
     @Column(name = "confirmation_state")
     private ConfirmationState confirmationState;
+    @Column(nullable = false, length = 1000)
     private String token;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(mappedBy = "confirmation")
-    @JoinColumn(nullable = false, name = "user_confirmation")
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Confirmation(LocalDateTime localDateTime, ConfirmationState confirmationState, String token, User user) {

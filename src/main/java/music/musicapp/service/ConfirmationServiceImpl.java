@@ -37,6 +37,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     private String host;
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
+
     @Transactional
     @Override
     public boolean userEmailAccepted(Long id, String token) {
@@ -44,7 +45,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
         final User user = userRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
+        System.out.println(user.getConfirmation().getConfirmationState());
         if (handleConfirmationClick(token)) {
             sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted");
             return true;
@@ -59,22 +60,18 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     @Override
     public boolean handleConfirmationClick(String token) {
 
-        Confirmation confirmation = confirmationRepository.findByConfirmationToken(token)
-                .orElseThrow(() -> new RestException(ExceptionEnum.CONFIRMATION_IS_NOT_FOUND));
-
-        User user = userRepository.findByConfirmationToken(token)
+        final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+        System.out.println(user.getConfirmation().getToken());
+        Confirmation confirmation = user.getConfirmation();
 
-
-        if (user != null && user.getConfirmation() != null && !user.getConfirmation().getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
+        if (confirmation != null && !confirmation.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
             confirmation.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
-        }
-        else{
-            confirmation.setConfirmationState(EMAIL_VERIFICATION_NOT_ACCEPTED);
+            confirmationRepository.save(confirmation);
+            return true;
+        } else {
             return false;
         }
-        confirmationRepository.save(confirmation);
-        return true;
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
@@ -105,10 +102,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         message.setTo(to);
         message.setFrom(fromEmail);
         message.setSubject(subject);
-        message.setText("The message was generated for a user with the nickname " + user.getUsername() +
-                ". If this happens otherwise, please report it to our support." +
+        message.setText("The message was generated for a user with the nickname " + user.getFirstname() + user.getLastname() +
+                ". If this happens otherwise, please report it to our support.\n" +
                 " Click the link below to confirm your registration:\n" + confirmationLink +
-                " The message with the link is only valid for 7 days, after which your account will expire");
+                " \nThe message with the link is only valid for 7 days, after which your account will expire");
 
         javaMailSender.send(message);
     }

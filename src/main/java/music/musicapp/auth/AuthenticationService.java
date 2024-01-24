@@ -26,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class AuthenticationService {
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
 
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
 
         User user = User.builder()
@@ -57,7 +59,7 @@ public class AuthenticationService {
                 .sex(request.getSex())
                 .build();
 
-        var confirmation = Confirmation.builder()
+        Confirmation confirmation = Confirmation.builder()
                 .id(null)
                 .token(generateTokenToEmail(user))
                 .localDateTime(LocalDateTime.now())
