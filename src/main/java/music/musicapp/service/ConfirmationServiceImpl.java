@@ -1,6 +1,8 @@
 package music.musicapp.service;
 
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.auth.AuthenticationService;
 import music.musicapp.exception.ExceptionEnum;
@@ -13,6 +15,7 @@ import music.musicapp.service.interfaceService.ConfirmationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +43,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     @Transactional
     @Override
-    public boolean userEmailAccepted(Long id, String token) {
+    public boolean userEmailAccpetatingLink(Long id, String token) throws MessagingException {
 
 
         final User user = userRepository.findById(id).orElseThrow(
@@ -73,7 +76,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
-    public void userLinkExpired() {
+    public void userLinkExpired() throws MessagingException {
         List<User> unacceptedUsers = userRepository.findByConfirmation_ConfirmationState(
                 EMAIL_VERIFICATION_REQUIRED);
 
@@ -88,23 +91,29 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         }
     }
 
-    private void sendConfirmationEmail(String to, String subject) {
+    private void sendConfirmationEmail(String to, String subject) throws MessagingException {
 
-        final User user = userRepository.findByEmail(to) // przyjerzec się temu czy to zadziała zgodnie z oczekiwaniami
+        final User user = userRepository.findByEmail(to)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final SimpleMailMessage message = new SimpleMailMessage();
         final String token = user.getConfirmation().getToken();
-        final String confirmationLink = host + user.getId() + "/confirm?token=" + token;
+        final String confirmationLink = "http://localhost:8080/" + user.getId() + "/confirm?token=" + token;
 
-        message.setTo(to);
-        message.setFrom(fromEmail);
-        message.setSubject(subject);
-        message.setText("The message was generated for a user with the nickname " + user.getFirstname() + user.getLastname() +
-                ". If this happens otherwise, please report it to our support.\n" +
-                " Click the link below to confirm your registration:\n" + confirmationLink +
-                " \nThe message with the link is only valid for 7 days, after which your account will expire");
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
+        String htmlContent = "<p>The message was generated for a user with the name " + user.getFirstname() + " " + user.getLastname() + "</p>" +
+                "<p>Click the link below to confirm your registration:</p>" +
+                "<a href=\"" + confirmationLink + "\">Confirm Registration</a>" +
+                "<p>The message with the link is only valid for 7 days, after which your account will expire. If this happens otherwise, please report it to our support.</p>";
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
+        helper.setFrom(fromEmail);
+
+        javaMailSender.send(mimeMessage);
         javaMailSender.send(message);
     }
 }

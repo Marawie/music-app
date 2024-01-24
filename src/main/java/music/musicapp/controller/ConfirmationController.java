@@ -1,5 +1,6 @@
 package music.musicapp.controller;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.service.interfaceService.ConfirmationService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,7 @@ public class ConfirmationController {
     private final ConfirmationService confirmationService;
 
     @GetMapping("/confirm/{id}")
-    public void confirmRegistrationLink(@PathVariable Long id, @RequestParam("token") String token) {
-        confirmationService.userEmailAccepted(id, token);
+    public void confirmRegistrationLink(@PathVariable Long id, @RequestParam("token") String token) throws MessagingException {
+        confirmationService.userEmailAccpetatingLink(id, token);
     }
 }
