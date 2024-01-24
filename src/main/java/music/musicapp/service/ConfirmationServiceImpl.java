@@ -45,9 +45,8 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
         final User user = userRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-        System.out.println(user.getConfirmation().getConfirmationState());
         if (handleConfirmationClick(token)) {
-            sendConfirmationEmail(user.getEmail(), "Registration confirmation accepted");
+            sendConfirmationEmail(user.getEmail(), "Registration confirmation required");
             return true;
 
         } else {
@@ -62,11 +61,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
         final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-        System.out.println(user.getConfirmation().getToken());
         Confirmation confirmation = user.getConfirmation();
 
         if (confirmation != null && !confirmation.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
-            confirmation.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+            confirmation.setConfirmationState(EMAIL_VERIFICATION_REQUIRED);
             confirmationRepository.save(confirmation);
             return true;
         } else {
@@ -77,7 +75,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     public void userLinkExpired() {
         List<User> unacceptedUsers = userRepository.findByConfirmation_ConfirmationState(
-                EMAIL_VERIFICATION_NOT_ACCEPTED);
+                EMAIL_VERIFICATION_REQUIRED);
 
         for (User user : unacceptedUsers) {
             LocalDateTime localDateTime = user.getConfirmation().getLocalDateTime();
