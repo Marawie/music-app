@@ -14,6 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     List<User> findByConfirmation_ConfirmationState(ConfirmationState confirmationState);
 
-    @Query("SELECT u FROM User u WHERE u.confirmation.user_confirmation = ?1")
+    @Query("SELECT u FROM User u WHERE u.confirmation.token = :confirmationToken")
     Optional<User> findByConfirmationToken(String confirmationToken);
 }
