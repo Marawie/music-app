@@ -13,7 +13,6 @@ import music.musicapp.repository.ConfirmationRepository;
 import music.musicapp.repository.UserRepository;
 import music.musicapp.service.interfaceService.ConfirmationService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static music.musicapp.exception.ExceptionEnum.CONFIRMATION_FAILED;
 import static music.musicapp.model.user.ConfirmationState.*;
 
 @Service
@@ -43,21 +43,21 @@ public class ConfirmationServiceImpl implements ConfirmationService {
 
     @Transactional
     @Override
-    public boolean userEmailAccpetatingLink(Long id, String token) throws MessagingException {
-
+    public void userEmailAcceptingLink(Long id, String token) throws MessagingException {
 
         final User user = userRepository.findById(id).orElseThrow(
                 () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
         if (handleConfirmationClick(token)) {
             sendConfirmationEmail(user.getEmail(), "Registration confirmation required");
-            return true;
 
         } else {
             confirmationRepository.save(user.getConfirmation());
             sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted");
-            return false;
         }
     }
+
+
 
     @Override
     public boolean handleConfirmationClick(String token) {
@@ -73,6 +73,23 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void userAcceptedLink(Long id, String token) {
+
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        Confirmation confirmation = user.getConfirmation();
+
+        if (!confirmation.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)
+                && confirmation != null && !confirmation.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)){
+            confirmation.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+            confirmationRepository.save(confirmation);
+        }
+        else
+            throw new RestException(CONFIRMATION_FAILED);
     }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
@@ -96,7 +113,6 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         final User user = userRepository.findByEmail(to)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
-        final SimpleMailMessage message = new SimpleMailMessage();
         final String token = user.getConfirmation().getToken();
         final String confirmationLink = "http://localhost:8080/" + user.getId() + "/confirm?token=" + token;
 
@@ -114,6 +130,9 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         helper.setFrom(fromEmail);
 
         javaMailSender.send(mimeMessage);
-        javaMailSender.send(message);
     }
 }
+
+// trzeba zrobic tak zeby tam metoda wywoływała się zawsze po stworzeniu konta
+// metode ktora bedzie taka jak link informacyjny jesli sie w niego wejdzie to przekieruje nas do strony gdzie bedzie napisane ze rejestracja sie powiodła
+// metoda która ponownie wysle potwierdzenie

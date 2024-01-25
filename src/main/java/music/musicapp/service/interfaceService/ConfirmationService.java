@@ -4,6 +4,11 @@ import jakarta.mail.MessagingException;
 
 public interface ConfirmationService {
     void userLinkExpired() throws MessagingException;
-    boolean userEmailAccpetatingLink(Long id, String token) throws MessagingException;
+
+    void userEmailAcceptingLink(Long id, String token) throws MessagingException;
+
     boolean handleConfirmationClick(String token);
+
+    void userAcceptedLink(Long id, String token);
+
 }
