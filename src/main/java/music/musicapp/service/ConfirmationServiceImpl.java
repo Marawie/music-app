@@ -76,9 +76,10 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     }
 
     @Override
+    @Transactional
     public void userAcceptedLink(Long id, String token) {
 
-        final User user = userRepository.findByConfirmationToken(token)
+        final User user = userRepository.findById(id)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         Confirmation confirmation = user.getConfirmation();
@@ -114,7 +115,7 @@ public class ConfirmationServiceImpl implements ConfirmationService {
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final String token = user.getConfirmation().getToken();
-        final String confirmationLink = "http://localhost:8080/" + user.getId() + "/confirm?token=" + token;
+        final String confirmationLink = "http://localhost:8080/confirm/" + user.getId() + "/confirm?token=" + token;
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");

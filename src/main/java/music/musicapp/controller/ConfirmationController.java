@@ -1,5 +1,6 @@
 package music.musicapp.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.service.interfaceService.ConfirmationService;
@@ -20,6 +21,7 @@ public class ConfirmationController {
     }
 
     @GetMapping("/confirm/{id}/{token}")
+    @PermitAll
     public ResponseEntity<String> confirmedRegistrationByUser(@PathVariable Long id, @PathVariable String token) {
         confirmationService.userAcceptedLink(id, token);
         return ResponseEntity.ok("Account confirmed successfully");
