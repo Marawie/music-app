@@ -22,7 +22,7 @@ public enum ExceptionEnum {
     PLAYLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "Playlist not found!"),
     USER_CONFIRMATION_STATE_IS_NOT_ACCEPTED(HttpStatus.FORBIDDEN , "You have to click link which is generated in your email. You have only 7 days to do it, or account would be deleted"),
     CONFIRMATION_IS_NOT_FOUND(HttpStatus.FORBIDDEN, "Cannot find this type of confirmation in our database"),
-    CONFIRMATION_FAILED(HttpStatus.FORBIDDEN, "Sorry! Something went wrong, please send new confirmation email")
+    CONFIRMATION_FAILED(HttpStatus.BAD_REQUEST, "Sorry! Something went wrong, please send new confirmation email")
     ;
     private final HttpStatus httpStatus;
     private final String message;

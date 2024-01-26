@@ -33,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static music.musicapp.exception.ExceptionEnum.USER_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -60,7 +62,6 @@ public class AuthenticationService {
                 .build();
 
         Confirmation confirmation = Confirmation.builder()
-                .id(null)
                 .token(generateTokenToEmail(user))
                 .localDateTime(LocalDateTime.now())
                 .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
@@ -121,7 +122,7 @@ public class AuthenticationService {
         if (userEmail != null) {
 
             User user = repository.findByEmail(userEmail)
-                    .orElseThrow();
+                    .orElseThrow(() -> new RestException(USER_NOT_FOUND));
 
             if (jwtService.isTokenValid(refreshToken, user)) {
 
