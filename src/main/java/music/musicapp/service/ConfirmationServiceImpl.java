@@ -133,7 +133,3 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         javaMailSender.send(mimeMessage);
     }
 }
-
-// trzeba zrobic tak zeby tam metoda wywoływała się zawsze po stworzeniu konta
-// metode ktora bedzie taka jak link informacyjny jesli sie w niego wejdzie to przekieruje nas do strony gdzie bedzie napisane ze rejestracja sie powiodła
-// metoda która ponownie wysle potwierdzenie
