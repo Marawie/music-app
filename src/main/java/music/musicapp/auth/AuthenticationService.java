@@ -14,10 +14,8 @@ import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.token.Token;
 import music.musicapp.model.token.TokenType;
-import music.musicapp.model.user.Confirmation;
 import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.User;
-import music.musicapp.repository.ConfirmationRepository;
 import music.musicapp.repository.TokenRepository;
 import music.musicapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +41,6 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final ConfirmationRepository confirmationRepository;
 
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
@@ -59,16 +56,12 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .sex(request.getSex())
+                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
+                .token(generateTokenToEmail(TokenType.ACCESS))
+                .localDateTime(LocalDateTime.now())
                 .build();
 
-        Confirmation confirmation = Confirmation.builder()
-                .token(generateTokenToEmail(user))
-                .localDateTime(LocalDateTime.now())
-                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
-                .user(user).build();
-
         User savedUser = repository.save(user);
-        confirmationRepository.save(confirmation);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
@@ -87,7 +80,7 @@ public class AuthenticationService {
         );
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
-        if (user.getConfirmation().getConfirmationState() == ConfirmationState.EMAIL_VERIFICATION_ACCEPTED){
+        if (user.getConfirmationState() == ConfirmationState.EMAIL_VERIFICATION_ACCEPTED){
 
             String jwtToken = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
@@ -160,12 +153,15 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public String generateTokenToEmail(User user) {
+    public String generateTokenToEmail(TokenType purpose) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() * 1000);
+
         return Jwts.builder()
-                .setSubject(user.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) //tydzien wanzy
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .claim("purpose", purpose.name())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 }

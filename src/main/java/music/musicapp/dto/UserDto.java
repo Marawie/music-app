@@ -2,9 +2,11 @@ package music.musicapp.dto;
 
 import lombok.*;
 import music.musicapp.model.Playlist;
+import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.FriendshipRequestState;
 import music.musicapp.model.user.User;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Setter
@@ -21,4 +23,7 @@ public class UserDto {
     private Set<User> userSet;
     private FriendshipRequestState state;
     private Set<Playlist> playlists;
+    private ConfirmationState confirmationState;
+    private String token;
+    private LocalDateTime localDateTime;
 }

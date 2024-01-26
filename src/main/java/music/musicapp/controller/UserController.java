@@ -1,9 +1,10 @@
 package music.musicapp.controller;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
 import music.musicapp.dto.SearchResultDto;
-import music.musicapp.service.interfaceService.PlaylistService;
 import music.musicapp.service.interfaceService.SearchService;
 import music.musicapp.service.interfaceService.UserService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,6 @@ import java.security.Principal;
 public class UserController {
     private final UserService userService;
     private final SearchService searchService;
-    private final PlaylistService playlistService;
 
 
     @GetMapping("search")
@@ -35,4 +35,15 @@ public class UserController {
         userService.changePassword(request, principal);
     }
 
+    @GetMapping("/confirm-request/{id}")
+    public void confirmRegistrationLink(@PathVariable Long id, @RequestParam("token") String token) throws MessagingException {
+        userService.userEmailAcceptingLink(id, token);
+    }
+
+    @GetMapping("/confirm/{id}/{token}")
+    @PermitAll
+    public ResponseEntity<String> confirmedRegistrationByUser(@PathVariable Long id, @PathVariable String token) {
+        userService.userAcceptedLink(id, token);
+        return ResponseEntity.ok("Account confirmed successfully");
+    }
 }

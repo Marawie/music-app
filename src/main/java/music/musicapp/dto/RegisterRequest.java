@@ -20,4 +20,5 @@ public class RegisterRequest {
     private String password;
     private Role role;
     private Sex sex;
+    private String token;
 }

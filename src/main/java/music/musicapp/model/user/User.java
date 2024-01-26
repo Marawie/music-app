@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -31,7 +32,7 @@ public class User implements UserDetails {
 
     @Size(min = 3, max = 50)
     private String lastname;
-
+    private LocalDateTime localDateTime;
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -73,10 +74,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Friendship> friends = new HashSet<>();
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Confirmation confirmation;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "confirmation_state")
+    private ConfirmationState confirmationState;
+    @Column(nullable = false, length = 1000)
+    private String token;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
