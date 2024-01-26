@@ -4,6 +4,7 @@ package music.musicapp.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.TokenRepository;
 import music.musicapp.repository.UserRepository;
+import music.musicapp.service.interfaceService.MailSenderService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +43,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final MailSenderService mailSenderService;
 
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
@@ -57,11 +60,17 @@ public class AuthenticationService {
                 .role(request.getRole())
                 .sex(request.getSex())
                 .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
-                .token(generateTokenToEmail(TokenType.ACCESS))
+                .confirmationToken(generateTokenToEmail(TokenType.ACCESS))
                 .localDateTime(LocalDateTime.now())
                 .build();
 
         User savedUser = repository.save(user);
+        try {
+            mailSenderService.sendConfirmationEmail(user.getEmail(), "Music-app");
+        }
+        catch (MessagingException e) {
+            throw new RestException(USER_NOT_FOUND);
+        }
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
@@ -158,10 +167,10 @@ public class AuthenticationService {
         Date expiryDate = new Date(now.getTime() * 1000);
 
         return Jwts.builder()
-                .claim("purpose", purpose.name())
+                .setSubject(purpose.name())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
 }

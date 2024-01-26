@@ -35,8 +35,8 @@ public class SecurityConfiguration {
             "/webjars/**",
             "/swagger-ui.html",
             "/api/v1/**",
-            "/confirm/**",
-            "/confirm-request/**"
+            "user/panel/confirm/**",
+
     };
 
     @Bean

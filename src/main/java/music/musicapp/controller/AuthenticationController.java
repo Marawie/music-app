@@ -1,5 +1,6 @@
 package music.musicapp.controller;
 
+import jakarta.mail.MessagingException;
 import music.musicapp.auth.AuthenticationService;
 import music.musicapp.dto.AuthenticationRequest;
 import music.musicapp.dto.AuthenticationResponse;
@@ -23,7 +24,7 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) throws MessagingException {
         return ResponseEntity.ok(service.register(request));
     }
 

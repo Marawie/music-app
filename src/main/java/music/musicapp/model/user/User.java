@@ -77,8 +77,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "confirmation_state")
     private ConfirmationState confirmationState;
-    @Column(nullable = false, length = 1000)
-    private String token;
+    @Column( name ="confirmation_token" ,nullable = false, length = 1000)
+    private String confirmationToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

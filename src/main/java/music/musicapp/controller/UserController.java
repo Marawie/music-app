@@ -1,7 +1,6 @@
 package music.musicapp.controller;
 
 import jakarta.annotation.security.PermitAll;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
 import music.musicapp.dto.SearchResultDto;
@@ -33,11 +32,6 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:update')")
     public void changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
         userService.changePassword(request, principal);
-    }
-
-    @GetMapping("/confirm-request/{id}")
-    public void confirmRegistrationLink(@PathVariable Long id, @RequestParam("token") String token) throws MessagingException {
-        userService.userEmailAcceptingLink(id, token);
     }
 
     @GetMapping("/confirm/{id}/{token}")
