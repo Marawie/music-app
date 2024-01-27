@@ -32,7 +32,7 @@ public class User implements UserDetails {
 
     @Size(min = 3, max = 50)
     private String lastname;
-    private LocalDateTime localDateTime;
+    private LocalDateTime dateThatUserCreateAccount;
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -79,6 +79,7 @@ public class User implements UserDetails {
     private ConfirmationState confirmationState;
     @Column( name ="confirmation_token" ,nullable = false, length = 1000)
     private String confirmationToken;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

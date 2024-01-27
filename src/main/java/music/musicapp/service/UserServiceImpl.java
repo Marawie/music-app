@@ -58,6 +58,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
+    public void userAcceptedLink(Long id, String token) {
+
+        final User user = userRepository.findById(id)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED) &&
+                !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)){
+            user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+            userRepository.save(user);
+        }
+        else
+            throw new RestException(CONFIRMATION_FAILED);
+    }
+
+    @Transactional
     private void userEmailAcceptingLink(Long id, String token) throws MessagingException {
 
         final User user = userRepository.findById(id).orElseThrow(
@@ -86,29 +101,17 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
-    @Transactional
-    public void userAcceptedLink(Long id, String token) {
 
-        final User user = userRepository.findById(id)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED) &&
-                !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)){
-            user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
-            userRepository.save(user);
-        }
-        else
-            throw new RestException(CONFIRMATION_FAILED);
-    }
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     @Transactional
     protected void userLinkExpired() throws MessagingException {
+
         List<User> unacceptedUsers = userRepository.findByConfirmationState(
                 EMAIL_VERIFICATION_REQUIRED);
 
         for (User user : unacceptedUsers) {
-            LocalDateTime localDateTime = user.getLocalDateTime();
+            LocalDateTime localDateTime = user.getDateThatUserCreateAccount();
             if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
                 user.setConfirmationState(EMAIL_VERIFICATION_EXPIRED);
                 userRepository.delete(user);

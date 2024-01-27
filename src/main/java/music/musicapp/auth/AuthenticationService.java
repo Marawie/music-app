@@ -60,8 +60,8 @@ public class AuthenticationService {
                 .role(request.getRole())
                 .sex(request.getSex())
                 .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
-                .confirmationToken(generateTokenToEmail(TokenType.ACCESS))
-                .localDateTime(LocalDateTime.now())
+                .confirmationToken(generateTokenToEmail())
+                .dateThatUserCreateAccount(LocalDateTime.now())
                 .build();
 
         User savedUser = repository.save(user);
@@ -162,12 +162,12 @@ public class AuthenticationService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public String generateTokenToEmail(TokenType purpose) {
+    public String generateTokenToEmail() {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() * 1000);
 
         return Jwts.builder()
-                .setSubject(purpose.name())
+                .setSubject(String.valueOf(TokenType.ACCESS))
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
