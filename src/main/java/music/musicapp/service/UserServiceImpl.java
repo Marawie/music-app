@@ -72,37 +72,6 @@ public class UserServiceImpl implements UserService {
             throw new RestException(CONFIRMATION_FAILED);
     }
 
-    @Transactional
-    private void userEmailAcceptingLink(Long id, String token) throws MessagingException {
-
-        final User user = userRepository.findById(id).orElseThrow(
-                () -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        if (handleConfirmationClick(token)) {
-            mailSenderService.sendConfirmationEmail(user.getEmail(), "Registration confirmation required");
-
-        } else {
-            userRepository.save(user);
-            mailSenderService.sendConfirmationEmail(user.getEmail(), "Registration confirmation unaccepted");
-        }
-    }
-
-    @Transactional
-    private boolean handleConfirmationClick(String token) {
-
-        final User user = userRepository.findByConfirmationToken(token)
-                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
-
-        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
-            user.setConfirmationState(EMAIL_VERIFICATION_REQUIRED);
-            userRepository.save(user);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     @Transactional
     protected void userLinkExpired() throws MessagingException {

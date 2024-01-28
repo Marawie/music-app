@@ -1,6 +1,5 @@
 package music.musicapp.controller;
 
-import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
 import music.musicapp.dto.SearchResultDto;
@@ -35,7 +34,6 @@ public class UserController {
     }
 
     @GetMapping("/confirm/{id}/{token}")
-    @PermitAll
     public ResponseEntity<String> confirmedRegistrationByUser(@PathVariable Long id, @PathVariable String token) {
         userService.userAcceptedLink(id, token);
         return ResponseEntity.ok("Account confirmed successfully");

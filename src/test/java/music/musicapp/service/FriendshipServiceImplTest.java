@@ -158,6 +158,7 @@ class FriendshipServiceImplTest {
         Set<UserDto> result = friendshipService.getAllFriendship(principal);
 
         // Then
+   //TODO cos jest zle w tej metodzie albo tescie sprawdzic pozniej
         assertEquals(2, result);
     }
 }

@@ -59,7 +59,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .sex(request.getSex())
-                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_NOT_ACCEPTED)
+                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_REQUIRED)
                 .confirmationToken(generateTokenToEmail())
                 .dateThatUserCreateAccount(LocalDateTime.now())
                 .build();
