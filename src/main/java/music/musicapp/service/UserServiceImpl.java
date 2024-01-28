@@ -58,19 +58,53 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public void userAcceptedLink(Long id, String token) {
+    public void userAcceptedLink(String token) {
 
-        final User user = userRepository.findById(id)
+        final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED) &&
-                !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)){
+                !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)) {
             user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
             userRepository.save(user);
-        }
-        else
+        } else
             throw new RestException(CONFIRMATION_FAILED);
     }
+
+    @Override
+    @Transactional
+    public void userReminderEmail(String token) {
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED) &&
+                !user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
+            try {
+                mailSenderService.sendEmailReminder(user.getEmail(), "Music-app");
+            } catch (MessagingException e) {
+                throw new RestException(ExceptionEnum.USER_NOT_FOUND);
+            }
+        }
+    }
+
+    @Override
+    public boolean handleConfirmationClick(String token) {
+
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)
+                && !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)) {
+
+            user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+            userRepository.save(user);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
 
     @Scheduled(cron = "0 0 1 * * ?") // 1am
     @Transactional

@@ -26,12 +26,37 @@ public class MailSenderServiceImpl implements MailSenderService {
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
         final String token = user.getConfirmationToken();
-        final String confirmationLink = String.format("http://localhost:8080/user/panel/confirm/" + user.getId() + "/confirm?token=" + token);
+        final String confirmationLink = String.format("http://localhost:8080/user/panel/confirm/" + "confirm?token=" + token);
 
         String htmlContent = emailContentBuilder.buildConfirmationEmail(user.getFirstname() + " " + user.getLastname(), confirmationLink);
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlContent, true);
+        helper.setFrom(user.getEmail());
+
+        javaMailSender.send(mimeMessage);
+    }
+
+    @Override
+    public void sendEmailReminder(String to, String subject) throws MessagingException {
+
+        final User user = userRepository.findByEmail(to)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        final String token = user.getConfirmationToken();
+        final String confirmationLink = String.format("http://localhost:8080/user/panel/confirm/handle/" + "confirm?token=" + token);
+
+        user.setConfirmationToken(token);
+        userRepository.save(user);
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+        String htmlContent = emailContentBuilder.buildReminderEmail(user.getFirstname() + " " + user.getLastname(), confirmationLink);
 
         helper.setTo(to);
         helper.setSubject(subject);

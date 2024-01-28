@@ -36,6 +36,7 @@ public class SecurityConfiguration {
             "/swagger-ui.html",
             "/api/v1/**",
             "user/panel/confirm/**",
+            "user/panel/confirm/handle/**"
 
     };
 
