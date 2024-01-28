@@ -16,6 +16,7 @@ import music.musicapp.exception.RestException;
 import music.musicapp.model.token.Token;
 import music.musicapp.model.token.TokenType;
 import music.musicapp.model.user.ConfirmationState;
+import music.musicapp.model.user.Role;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.TokenRepository;
 import music.musicapp.repository.UserRepository;
@@ -57,7 +58,7 @@ public class AuthenticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.USER)
                 .sex(request.getSex())
                 .confirmationState(ConfirmationState.EMAIL_VERIFICATION_REQUIRED)
                 .confirmationToken(generateTokenToEmail())
@@ -101,7 +102,6 @@ public class AuthenticationService {
                     .refreshToken(refreshToken)
                     .build();
         }
-
         else throw new RestException(ExceptionEnum.USER_CONFIRMATION_STATE_IS_NOT_ACCEPTED);
     }
 

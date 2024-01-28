@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import music.musicapp.model.user.Role;
 import music.musicapp.model.user.Sex;
 
 @Data
@@ -18,7 +17,6 @@ public class RegisterRequest {
     private String lastname;
     private String email;
     private String password;
-    private Role role;
     private Sex sex;
     private String token;
 }

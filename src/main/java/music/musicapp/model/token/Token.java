@@ -14,6 +14,7 @@ import music.musicapp.model.user.User;
 @AllArgsConstructor
 @Entity
 public class Token {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;

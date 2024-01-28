@@ -32,10 +32,4 @@ public class UserController {
     public void changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
         userService.changePassword(request, principal);
     }
-
-    @GetMapping("/confirm/{id}/{token}")
-    public ResponseEntity<String> confirmedRegistrationByUser(@PathVariable Long id, @PathVariable String token) {
-        userService.userAcceptedLink(id, token);
-        return ResponseEntity.ok("Account confirmed successfully");
-    }
 }
