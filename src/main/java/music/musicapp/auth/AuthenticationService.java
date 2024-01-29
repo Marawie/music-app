@@ -2,6 +2,7 @@ package music.musicapp.auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.mail.MessagingException;
@@ -15,7 +16,6 @@ import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.token.Token;
 import music.musicapp.model.token.TokenType;
-import music.musicapp.model.user.ConfirmationState;
 import music.musicapp.model.user.Role;
 import music.musicapp.model.user.User;
 import music.musicapp.repository.TokenRepository;
@@ -49,6 +49,9 @@ public class AuthenticationService {
     @Value("${application.security.jwt.secret-key}")
     private String jwtSecret;
 
+    @Value("${token-activate.account}")
+    private int  expirationConfirmToken;
+
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
 
@@ -60,7 +63,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .sex(request.getSex())
-                .confirmationState(ConfirmationState.EMAIL_VERIFICATION_REQUIRED)
+                .isAccountActivated(false)
                 .confirmationToken(generateTokenToEmail())
                 .dateThatUserCreateAccount(LocalDateTime.now())
                 .build();
@@ -90,8 +93,8 @@ public class AuthenticationService {
         );
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
-        if (user.getConfirmationState() == ConfirmationState.EMAIL_VERIFICATION_ACCEPTED){
 
+        if (user.isAccountActivated()){
             String jwtToken = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
             revokeAllUserTokens(user);
@@ -164,10 +167,13 @@ public class AuthenticationService {
 
     public String generateTokenToEmail() {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() * 1000);
+        Date expiryDate = new Date(now.getTime() + expirationConfirmToken);
+
+        Claims claims = Jwts.claims().setSubject("access");
+        claims.put("tokenType", TokenType.ACCESS.name()); //czytałem o tokenie, teraz on się różni, jeśli to jest źle to nie wiem jak inaczej to powinienem zrobić
 
         return Jwts.builder()
-                .setSubject(String.valueOf(TokenType.ACCESS))
+                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)

@@ -33,6 +33,7 @@ public class User implements UserDetails {
     @Size(min = 3, max = 50)
     private String lastname;
     private LocalDateTime dateThatUserCreateAccount;
+    private boolean isAccountActivated;
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -74,12 +75,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Friendship> friends = new HashSet<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "confirmation_state")
-    private ConfirmationState confirmationState;
     @Column( name ="confirmation_token" ,nullable = false, length = 1000)
     private String confirmationToken;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

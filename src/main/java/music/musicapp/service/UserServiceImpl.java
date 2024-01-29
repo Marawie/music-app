@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static music.musicapp.exception.ExceptionEnum.CONFIRMATION_FAILED;
-import static music.musicapp.model.user.ConfirmationState.*;
-import static music.musicapp.model.user.ConfirmationState.EMAIL_VERIFICATION_EXPIRED;
 
 @Service
 @RequiredArgsConstructor
@@ -63,9 +61,8 @@ public class UserServiceImpl implements UserService {
         final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
-        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED) &&
-                !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)) {
-            user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+        if (!user.isAccountActivated()) {
+            user.setAccountActivated(true);
             userRepository.save(user);
         } else
             throw new RestException(CONFIRMATION_FAILED);
@@ -74,34 +71,32 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void userReminderEmail(String token) {
+
         final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
-        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED) &&
-                !user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)) {
+        if (!user.isAccountActivated()) {
             try {
                 mailSenderService.sendEmailReminder(user.getEmail(), "Music-app");
             } catch (MessagingException e) {
-                throw new RestException(ExceptionEnum.USER_NOT_FOUND);
+                throw new RestException(ExceptionEnum.YOUR_EMAIL_IS_ACTIVATED);
             }
         }
     }
 
     @Override
+    @Transactional
     public boolean handleConfirmationClick(String token) {
 
         final User user = userRepository.findByConfirmationToken(token)
                 .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
 
-        if (!user.getConfirmationState().equals(EMAIL_VERIFICATION_ACCEPTED)
-                && !user.getConfirmationState().equals(EMAIL_VERIFICATION_EXPIRED)) {
-
-            user.setConfirmationState(EMAIL_VERIFICATION_ACCEPTED);
+        if (!user.isAccountActivated()) {
+            user.setAccountActivated(true);
             userRepository.save(user);
             return true;
-        }
-        else {
-            return false;
+        } else {
+            throw new RestException(ExceptionEnum.YOUR_EMAIL_IS_ACTIVATED);
         }
     }
 
@@ -110,13 +105,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     protected void userLinkExpired() throws MessagingException {
 
-        List<User> unacceptedUsers = userRepository.findByConfirmationState(
-                EMAIL_VERIFICATION_REQUIRED);
+        List<User> unacceptedUsers = userRepository.findByIsAccountActivated(
+                false);
 
         for (User user : unacceptedUsers) {
             LocalDateTime localDateTime = user.getDateThatUserCreateAccount();
-            if (localDateTime.plusDays(7).isBefore(LocalDateTime.now())) {
-                user.setConfirmationState(EMAIL_VERIFICATION_EXPIRED);
+            if (localDateTime.plusDays(7).isBefore(LocalDateTime.now()) && !user.isAccountActivated()) {
                 userRepository.delete(user);
                 mailSenderService.sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!");
             }

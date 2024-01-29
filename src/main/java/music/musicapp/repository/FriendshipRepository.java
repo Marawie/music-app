@@ -13,7 +13,9 @@ import java.util.Set;
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     Friendship findByUserAndUserFriends(User user, User userFriend);
+
     Friendship findByUserFriendsAndUser(User user, User userFriend);
+
     @Query("SELECT f FROM Friendship f WHERE (f.user = :user AND f.friendshipRequestState = :state) OR (f.friend = :user AND f.friendshipRequestState = :state)")
     Set<Friendship> findAllByUserAndFriendshipRequestState(@Param("user") User user, @Param("state") FriendshipRequestState state);
 }
