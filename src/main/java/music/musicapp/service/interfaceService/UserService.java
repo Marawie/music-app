@@ -6,5 +6,7 @@ import java.security.Principal;
 
 public interface UserService {
     void changePassword(ChangePasswordRequest request, Principal connectedUser);
-
+    void userAcceptedLink(String token);
+    void userReminderEmail(String token);
+    boolean handleConfirmationClick(String token);
 }

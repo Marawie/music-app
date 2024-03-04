@@ -1,29 +1,31 @@
 package music.musicapp.service;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
 import music.musicapp.exception.ExceptionEnum;
 import music.musicapp.exception.RestException;
 import music.musicapp.model.user.User;
-import music.musicapp.repository.PlaylistRepository;
 import music.musicapp.repository.UserRepository;
+import music.musicapp.service.interfaceService.MailSenderService;
 import music.musicapp.service.interfaceService.UserService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static music.musicapp.exception.ExceptionEnum.CONFIRMATION_FAILED;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-
-    //Tez zalatwic cały mailing naprzyklad JavaMailSender
-
-    //Activate user (dostajesz token od JWTServisu (activteToken)), dalej generujesz link i wysyłasz mailem
-    //Zadbaj o to, zeby user który nie aktywował swojego konta poprzez zalozmy tydzin, byl usuniety z bazy (zrób pole daty wysylki maila)
-    //Zadbaj o tym zeby kiedy user nieaktywowany sie logowal, on mial komunikat typu aktywuj konto poprzez mail i mogl proprosic o wysylce maila powtornej
+    private final MailSenderService mailSenderService;
 
     //Zrobić 2FA możliwość
     //1. Ty musisz zadbać o tym żeby użytkownik wlączył możliwośćl używania 2FA (enable 2FA)
@@ -51,5 +53,67 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void userAcceptedLink(String token) {
+
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.isAccountActivated()) {
+            user.setAccountActivated(true);
+            userRepository.save(user);
+        } else
+            throw new RestException(CONFIRMATION_FAILED);
+    }
+
+    @Override
+    @Transactional
+    public void userReminderEmail(String token) {
+
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.isAccountActivated()) {
+            try {
+                mailSenderService.sendEmailReminder(user.getEmail(), "Music-app");
+            } catch (MessagingException e) {
+                throw new RestException(ExceptionEnum.YOUR_EMAIL_IS_ACTIVATED);
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean handleConfirmationClick(String token) {
+
+        final User user = userRepository.findByConfirmationToken(token)
+                .orElseThrow(() -> new RestException(ExceptionEnum.USER_NOT_FOUND));
+
+        if (!user.isAccountActivated()) {
+            user.setAccountActivated(true);
+            userRepository.save(user);
+            return true;
+        } else {
+            throw new RestException(ExceptionEnum.YOUR_EMAIL_IS_ACTIVATED);
+        }
+    }
+
+
+    @Scheduled(cron = "0 0 1 * * ?") // 1am
+    @Transactional
+    protected void userLinkExpired() throws MessagingException {
+
+        List<User> unacceptedUsers = userRepository.findByIsAccountActivated(
+                false);
+
+        for (User user : unacceptedUsers) {
+            LocalDateTime localDateTime = user.getDateThatUserCreateAccount();
+            if (localDateTime.plusDays(7).isBefore(LocalDateTime.now()) && !user.isAccountActivated()) {
+                userRepository.delete(user);
+                mailSenderService.sendConfirmationEmail(user.getEmail(), "Your registration confirmation has expired, please register again!");
+            }
+        }
     }
 }

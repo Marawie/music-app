@@ -1,6 +1,7 @@
 package music.musicapp.config;
 
 import lombok.RequiredArgsConstructor;
+import music.musicapp.components.EmailContentBuilder;
 import music.musicapp.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,5 +41,9 @@ public class ApplicationConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public EmailContentBuilder emailContentBuilder() {
+        return new EmailContentBuilder();
     }
 }

@@ -2,25 +2,39 @@ package music.musicapp.auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import music.musicapp.model.token.Token;
-import music.musicapp.model.token.TokenType;
-import music.musicapp.repository.TokenRepository;
-import music.musicapp.repository.UserRepository;
-import music.musicapp.model.user.User;
-import music.musicapp.dto.AuthenticationRequest;
-import music.musicapp.dto.AuthenticationResponse;
-import music.musicapp.dto.RegisterRequest;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import music.musicapp.dto.AuthenticationRequest;
+import music.musicapp.dto.AuthenticationResponse;
+import music.musicapp.dto.RegisterRequest;
+import music.musicapp.exception.ExceptionEnum;
+import music.musicapp.exception.RestException;
+import music.musicapp.model.token.Token;
+import music.musicapp.model.token.TokenType;
+import music.musicapp.model.user.Role;
+import music.musicapp.model.user.User;
+import music.musicapp.repository.TokenRepository;
+import music.musicapp.repository.UserRepository;
+import music.musicapp.service.interfaceService.MailSenderService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+
+import static music.musicapp.exception.ExceptionEnum.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -30,18 +44,37 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final MailSenderService mailSenderService;
 
+    @Value("${application.security.jwt.secret-key}")
+    private String jwtSecret;
+
+    @Value("${token-activate.account}")
+    private int  expirationConfirmToken;
+
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
+
         User user = User.builder()
                 .username(request.getUsername())
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.USER)
                 .sex(request.getSex())
+                .isAccountActivated(false)
+                .confirmationToken(generateTokenToEmail())
+                .dateThatUserCreateAccount(LocalDateTime.now())
                 .build();
+
         User savedUser = repository.save(user);
+        try {
+            mailSenderService.sendConfirmationEmail(user.getEmail(), "Music-app");
+        }
+        catch (MessagingException e) {
+            throw new RestException(USER_NOT_FOUND);
+        }
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         saveUserToken(savedUser, jwtToken);
@@ -60,35 +93,48 @@ public class AuthenticationService {
         );
         User user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
-        String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+
+        if (user.isAccountActivated()){
+            String jwtToken = jwtService.generateToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, jwtToken);
+
+            return AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        }
+        else throw new RestException(ExceptionEnum.USER_CONFIRMATION_STATE_IS_NOT_ACCEPTED);
     }
+
     public void refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
+            HttpServletResponse response) throws IOException {
+
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
+
         }
+
         refreshToken = authHeader.substring(7);
         userEmail = jwtService.extractUsername(refreshToken);
+
         if (userEmail != null) {
+
             User user = repository.findByEmail(userEmail)
-                    .orElseThrow();
+                    .orElseThrow(() -> new RestException(USER_NOT_FOUND));
+
             if (jwtService.isTokenValid(refreshToken, user)) {
+
                 String accessToken = jwtService.generateToken(user);
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken);
-                var authResponse = AuthenticationResponse.builder()
+                AuthenticationResponse authResponse = AuthenticationResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
                         .build();
@@ -117,5 +163,20 @@ public class AuthenticationService {
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
+    }
+
+    public String generateTokenToEmail() {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationConfirmToken);
+
+        Claims claims = Jwts.claims().setSubject("access");
+        claims.put("tokenType", TokenType.ACCESS.name()); //czytałem o tokenie, teraz on się różni, jeśli to jest źle to nie wiem jak inaczej to powinienem zrobić
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .compact();
     }
 }

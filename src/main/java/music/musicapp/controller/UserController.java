@@ -3,7 +3,6 @@ package music.musicapp.controller;
 import lombok.RequiredArgsConstructor;
 import music.musicapp.dto.ChangePasswordRequest;
 import music.musicapp.dto.SearchResultDto;
-import music.musicapp.service.interfaceService.PlaylistService;
 import music.musicapp.service.interfaceService.SearchService;
 import music.musicapp.service.interfaceService.UserService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +19,6 @@ import java.security.Principal;
 public class UserController {
     private final UserService userService;
     private final SearchService searchService;
-    private final PlaylistService playlistService;
 
 
     @GetMapping("search")
@@ -34,5 +32,4 @@ public class UserController {
     public void changePassword(@RequestBody ChangePasswordRequest request, Principal principal) {
         userService.changePassword(request, principal);
     }
-
 }

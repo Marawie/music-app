@@ -17,7 +17,6 @@ import java.util.Set;
 public class FriendshipController {
     private final FriendshipService friendshipService;
 
-
     @GetMapping("all")
     public Set<UserDto> ListOfFriends(Principal principal) {
         return friendshipService.getAllFriendship(principal);
@@ -41,7 +40,7 @@ public class FriendshipController {
     public UserDto rejectRequestFromFriend(Principal principal, @PathVariable Long friendId) {
         return friendshipService.rejectFriendshipRequest(principal, friendId);
     }
-
+// todo zastanowic sie czy tu post i delete i tak samo na goerze
     @PostMapping("withdrawn/request")
     @PreAuthorize("hasAuthority('user:create')")
     public UserDto withdrawnYourRequest(Principal principal, @PathVariable Long friendId) {

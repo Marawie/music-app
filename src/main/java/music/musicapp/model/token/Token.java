@@ -1,12 +1,12 @@
 package music.musicapp.model.token;
 
 
-import music.musicapp.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import music.musicapp.model.user.User;
 
 @Data
 @Builder
@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class Token {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
